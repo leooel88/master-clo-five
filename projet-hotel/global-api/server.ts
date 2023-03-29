@@ -1,13 +1,21 @@
 import express = require("express");
 import axios from 'axios';
 
+const {
+  GLOBAL_PORT,
+  HOTEL_MICROSERVICE_URL,
+  ROOM_MICROSERVICE_URL,
+  RESERVATION_MICROSERVICE_URL,
+  CATEGORY_MICROSERVICE_URL
+} = process.env
+
 const app = express();
 app.use(express.json());
 
 /////////////////////
 // HOTELS
 const hotelService = axios.create({
-  baseURL: 'http://localhost:4001'
+  baseURL: `${HOTEL_MICROSERVICE_URL}`
 })
 
 // GET ALL
@@ -68,7 +76,7 @@ app.delete('/hotels/:id', async (req, res) => {
 /////////////////////
 // ROOMS
 const roomService = axios.create({
-  baseURL: 'http://localhost:4002'
+  baseURL: `${ROOM_MICROSERVICE_URL}`
 })
 
 // GET ALL
@@ -129,7 +137,7 @@ app.delete('/rooms/:id', async (req, res) => {
 /////////////////////
 // RESERVATIONS
 const reservationService = axios.create({
-  baseURL: 'http://localhost:4003'
+  baseURL: `${RESERVATION_MICROSERVICE_URL}`
 })
 
 // GET ALL
@@ -200,7 +208,7 @@ app.delete('/reservations/:id', async (req, res) => {
 /////////////////////
 // CATEGORIES
 const categoryService = axios.create({
-  baseURL: 'http://localhost:4004'
+  baseURL: `${CATEGORY_MICROSERVICE_URL}`
 })
 
 // GET ALL
@@ -260,8 +268,6 @@ app.delete('/categories/:id', async (req, res) => {
 
 ///////////////////////
 
-const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, () => {
-  console.log(`Global API is running on port ${PORT}`);
+app.listen(+GLOBAL_PORT, () => {
+  console.log(`Global API is running on port ${GLOBAL_PORT}`);
 });

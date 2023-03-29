@@ -1,8 +1,7 @@
 import { Sequelize } from 'sequelize';
 
 const sequelize = new Sequelize(
-  process.env.DATABASE_URL ||
-  'mysql://application:password@localhost:3306/db_hotel',
+  process.env.DATABASE_URL,
   {
     dialect: 'mysql',
     logging: false,
