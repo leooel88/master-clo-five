@@ -122,7 +122,7 @@ In the _package.json_ file, you can notice different scripts :
 | start:category-service | To only start the __category__ microservice |
 | build | To compile all typescript files, according to the _./tsconfig.json_ configuration |
 | build:watch | To compile all typescript file in dynamic mode, so that any change in the scoped files will trigger another compilation |
-| db:sync | To only start the __category__ microservice |
+| db:sync | To synchronize the models of the API to the connected database |
 
 You can use any of theese scripts by running this command on your terminal : 
 ```
