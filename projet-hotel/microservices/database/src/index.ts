@@ -1,8 +1,10 @@
 import { sequelize } from './config/database.config';
+import { seedUser } from './seeds/users.seed';
 import './models/hotel';
 import './models/room';
 import './models/category';
 import './models/reservation';
+import './models/user';
 
 (async () => {
   try {
@@ -14,6 +16,7 @@ import './models/reservation';
     console.log('Synchronisation des modèles avec la base de données effectuée.');
 
     // Code pour insérer des données initiales si nécessaire
+    await seedUser();
   } catch (error) {
     console.error('Impossible de se connecter à la base de données:', error);
   }

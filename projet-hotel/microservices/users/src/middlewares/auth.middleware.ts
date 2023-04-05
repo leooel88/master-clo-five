@@ -46,7 +46,7 @@ export async function authAdmin(req: AuthenticatedRequest, res: Response, next: 
       return;
     }
 
-    if (!user.role || user.role !== 'ADMIN') {
+    if (!user.role || user.role !== 'ADMIN' || !user.username || user.username !== decoded.username) {
       res.status(401).json({ error: 'Vous n\'avez pas les autorisations suffisantes pour cette requête' });
       return;
     }
