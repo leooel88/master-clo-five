@@ -6,7 +6,8 @@ const {
   HOTEL_MICROSERVICE_URL,
   ROOM_MICROSERVICE_URL,
   RESERVATION_MICROSERVICE_URL,
-  CATEGORY_MICROSERVICE_URL
+  CATEGORY_MICROSERVICE_URL,
+  USER_MICROSERVICE_URL
 } = process.env
 
 const app = express();
@@ -20,9 +21,15 @@ const hotelService = axios.create({
 
 // GET ALL
 app.get('/hotels', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await hotelService.get(`/hotels`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await hotelService.get(`/hotels`, { headers });
+    } else {
+      response = await hotelService.get(`/hotels`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -31,9 +38,15 @@ app.get('/hotels', async (req, res) => {
 
 // GET
 app.get('/hotels/:id?', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await hotelService.get(`/hotels${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await hotelService.get(`/hotels${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    } else {
+      response = await hotelService.get(`/hotels${req.params.id ? '/' + req.params.id : ''}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -42,9 +55,15 @@ app.get('/hotels/:id?', async (req, res) => {
 
 // POST
 app.post('/hotels', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await hotelService.post(`/hotels`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await hotelService.post(`/hotels`, req.body, { headers });
+    } else {
+      response = await hotelService.post(`/hotels`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -53,9 +72,15 @@ app.post('/hotels', async (req, res) => {
 
 // PUT
 app.put('/hotels/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await hotelService.put(`/hotels/${req.params.id}`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await hotelService.put(`/hotels/${req.params.id}`, req.body, { headers });
+    } else {
+      response = await hotelService.put(`/hotels/${req.params.id}`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -64,9 +89,15 @@ app.put('/hotels/:id', async (req, res) => {
 
 // DELETE
 app.delete('/hotels/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await hotelService.delete(`/hotels/${req.params.id}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await hotelService.delete(`/hotels/${req.params.id}`, { headers });
+    } else {
+      response = await hotelService.delete(`/hotels/${req.params.id}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -81,9 +112,15 @@ const roomService = axios.create({
 
 // GET ALL
 app.get('/rooms', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await roomService.get(`/rooms`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await roomService.get(`/rooms`, { headers });
+    } else {
+      response = await roomService.get(`/rooms`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -92,9 +129,15 @@ app.get('/rooms', async (req, res) => {
 
 // GET
 app.get('/rooms/:id?', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await roomService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await roomService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    } else {
+      response = await roomService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -103,9 +146,15 @@ app.get('/rooms/:id?', async (req, res) => {
 
 // POST
 app.post('/rooms', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await roomService.post(`/rooms`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await roomService.post(`/rooms`, req.body, { headers });
+    } else {
+      response = await roomService.post(`/rooms`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -114,9 +163,15 @@ app.post('/rooms', async (req, res) => {
 
 // PUT
 app.put('/rooms/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await roomService.put(`/rooms/${req.params.id}`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await roomService.put(`/rooms/${req.params.id}`, req.body, { headers });
+    } else {
+      response = await roomService.put(`/rooms/${req.params.id}`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -125,9 +180,15 @@ app.put('/rooms/:id', async (req, res) => {
 
 // DELETE
 app.delete('/rooms/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await roomService.delete(`/rooms/${req.params.id}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await roomService.delete(`/rooms/${req.params.id}`, { headers });
+    } else {
+      response = await roomService.delete(`/rooms/${req.params.id}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -142,9 +203,15 @@ const reservationService = axios.create({
 
 // GET ALL
 app.get('/reservations', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.get(`/reservations`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.get(`/reservations`, { headers });
+    } else {
+      response = await reservationService.get(`/reservations`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -153,9 +220,15 @@ app.get('/reservations', async (req, res) => {
 
 // GET
 app.get('/reservations/:id?', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.get(`/reservations${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.get(`/reservations${req.params.id ? '/' + req.params.id : ''}`, { headers });
+    } else {
+      response = await reservationService.get(`/reservations${req.params.id ? '/' + req.params.id : ''}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -163,9 +236,15 @@ app.get('/reservations/:id?', async (req, res) => {
 });
 
 app.get('/reservations/userFullName/:userFullName', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.get(`/reservations/userFullName/${req.params.userFullName}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.get(`/reservations/userFullName/${req.params.userFullName}`, { headers });
+    } else {
+      response = await reservationService.get(`/reservations/userFullName/${req.params.userFullName}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -174,9 +253,15 @@ app.get('/reservations/userFullName/:userFullName', async (req, res) => {
 
 // POST
 app.post('/reservations', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.post(`/reservations`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.post(`/reservations`, req.body, { headers });
+    } else {
+      response = await reservationService.post(`/reservations`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -185,9 +270,15 @@ app.post('/reservations', async (req, res) => {
 
 // PUT
 app.put('/reservations/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.put(`/reservations/${req.params.id}`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.put(`/reservations/${req.params.id}`, req.body, { headers });
+    } else {
+      response = await reservationService.put(`/reservations/${req.params.id}`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -196,9 +287,15 @@ app.put('/reservations/:id', async (req, res) => {
 
 // DELETE
 app.delete('/reservations/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await reservationService.delete(`/reservations/${req.params.id}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await reservationService.delete(`/reservations/${req.params.id}`, { headers });
+    } else {
+      response = await reservationService.delete(`/reservations/${req.params.id}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -213,9 +310,15 @@ const categoryService = axios.create({
 
 // GET ALL
 app.get('/categories', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await categoryService.get(`/categories`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await categoryService.get(`/categories`, { headers });
+    } else {
+      response = await categoryService.get(`/categories`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -224,9 +327,15 @@ app.get('/categories', async (req, res) => {
 
 // GET
 app.get('/categories/:id?', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await categoryService.get(`/categories${req.params.id ? '/' + req.params.id : ''}`,{ headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await categoryService.get(`/categories${req.params.id ? '/' + req.params.id : ''}`,{ headers });
+    } else {
+      response = await categoryService.get(`/categories${req.params.id ? '/' + req.params.id : ''}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -235,9 +344,15 @@ app.get('/categories/:id?', async (req, res) => {
 
 // POST
 app.post('/categories', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await categoryService.post(`/categories`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await categoryService.post(`/categories`, req.body, { headers });
+    } else {
+      response = await categoryService.post(`/categories`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -246,9 +361,15 @@ app.post('/categories', async (req, res) => {
 
 // PUT
 app.put('/categories/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await categoryService.put(`/categories/${req.params.id}`, req.body, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await categoryService.put(`/categories/${req.params.id}`, req.body, { headers });
+    } else {
+      response = await categoryService.put(`/categories/${req.params.id}`, req.body);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
@@ -257,9 +378,123 @@ app.put('/categories/:id', async (req, res) => {
 
 // DELETE
 app.delete('/categories/:id', async (req, res) => {
+  let headers;
+  let response;
   try {
-    const headers = { authorization: req.headers.authorization };
-    const response = await categoryService.delete(`/categories/${req.params.id}`, { headers });
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await categoryService.delete(`/categories/${req.params.id}`, { headers });
+    } else {
+      response = await categoryService.delete(`/categories/${req.params.id}`);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+/////////////////////
+// USERS
+const userService = axios.create({
+  baseURL: `${USER_MICROSERVICE_URL}`
+})
+
+// GET ALL
+app.get('/users', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.get(`/users`, { headers });
+    } else {
+      response = await userService.get(`/users`);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+// GET
+app.get('/users/:id?', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.get(`/users${req.params.id ? '/' + req.params.id : ''}`,{ headers });
+    } else {
+      response = await userService.get(`/users${req.params.id ? '/' + req.params.id : ''}`);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+// POST
+app.post('/users', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.post(`/users`, req.body, { headers });
+    } else {
+      response = await userService.post(`/users`, req.body);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+// POST LOGIN
+app.post('/users/login', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.post(`/users/login`, req.body, { headers });
+    } else {
+      response = await userService.post(`/users/login`, req.body);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+// PUT
+app.put('/users/:id', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.put(`/users/${req.params.id}`, req.body, { headers });
+    } else {
+      response = await userService.put(`/users/${req.params.id}`, req.body);
+    }
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json(error.response.data);
+  }
+});
+
+// DELETE
+app.delete('/users/:id', async (req, res) => {
+  let headers;
+  let response;
+  try {
+    if (req.headers.authorization) {
+      headers = { authorization: req.headers.authorization };
+      response = await userService.delete(`/users/${req.params.id}`, { headers });
+    } else {
+      response = await userService.delete(`/users/${req.params.id}`);
+    }
     res.status(response.status).json(response.data);
   } catch (error) {
     res.status(error.response.status).json(error.response.data);
