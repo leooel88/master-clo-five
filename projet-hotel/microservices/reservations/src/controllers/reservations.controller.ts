@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getAllReservations, createReservation, getReservationById, updateReservation, deleteReservation as serviceDeleteReservation, getReservationByUserFullName as serviceGetReservationByUserFullName } from '../../../database/src/services/reservation.service';
-import { getRoomById } from '../../../database/src/services/room.service';
-import { getCategoryByCode } from '../../../database/src/services/category.service';
+import { getRoomById } from '../linkers/hotels.linker';
+import { getCategoryByCode } from '../linkers/configurations.linker';
 
 export async function getReservations(req: Request, res: Response): Promise<void> {
   console.log("Microservice : Reservation : GET ALL RESERVATIONS")
@@ -67,6 +67,10 @@ export async function postReservation(req: Request, res: Response): Promise<void
     savedReservation.checkOutDate = DATE_checkOutDate
     
     const roomData = await getRoomById(reservationData.roomId)
+    if (!roomData) {
+      res.status(404).json({error: 'La chambre renseigné est introuvable'})
+    }
+
     const categoryData = await getCategoryByCode(roomData.categoryCode)
 
     if (reservationData.numberPerson > categoryData.capacity) {
@@ -160,10 +164,16 @@ export async function putReservation(req: Request, res: Response): Promise<void>
     if (reservationData.roomId != null && reservationData.roomId != currentReservation.roomId) {
       savedReservation.roomId = reservationData.roomId
       const room = await getRoomById(savedReservation.roomId)
+      if (!room) {
+        res.status(404).json({error: 'La chambre renseigné est introuvable'})
+      }
       const category = await getCategoryByCode(room.categoryCode)
       savedReservation.moduledPrice = getDatesPriceForRoom(category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
     } else {
       const room = await getRoomById(currentReservation.roomId)
+      if (!room) {
+        res.status(404).json({error: 'La chambre renseigné est introuvable'})
+      }
       const category = await getCategoryByCode(room.categoryCode)
       savedReservation.moduledPrice = getDatesPriceForRoom(category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
       console.log("AFTER TIME CARE : ", savedReservation.moduledPrice)
