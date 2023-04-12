@@ -4,7 +4,6 @@ import axios from 'axios';
 const {
   GLOBAL_PORT,
   HOTEL_MICROSERVICE_URL,
-  ROOM_MICROSERVICE_URL,
   RESERVATION_MICROSERVICE_URL,
   CATEGORY_MICROSERVICE_URL,
   USER_MICROSERVICE_URL
@@ -106,9 +105,6 @@ app.delete('/hotels/:id', async (req, res) => {
 
 /////////////////////
 // ROOMS
-const roomService = axios.create({
-  baseURL: `${ROOM_MICROSERVICE_URL}`
-})
 
 // GET ALL
 app.get('/rooms', async (req, res) => {
@@ -117,9 +113,9 @@ app.get('/rooms', async (req, res) => {
   try {
     if (req.headers.authorization) {
       headers = { authorization: req.headers.authorization };
-      response = await roomService.get(`/rooms`, { headers });
+      response = await hotelService.get(`/rooms`, { headers });
     } else {
-      response = await roomService.get(`/rooms`);
+      response = await hotelService.get(`/rooms`);
     }
     res.status(response.status).json(response.data);
   } catch (error) {
@@ -134,9 +130,9 @@ app.get('/rooms/:id?', async (req, res) => {
   try {
     if (req.headers.authorization) {
       headers = { authorization: req.headers.authorization };
-      response = await roomService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`, { headers });
+      response = await hotelService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`, { headers });
     } else {
-      response = await roomService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`);
+      response = await hotelService.get(`/rooms${req.params.id ? '/' + req.params.id : ''}`);
     }
     res.status(response.status).json(response.data);
   } catch (error) {
@@ -151,9 +147,9 @@ app.post('/rooms', async (req, res) => {
   try {
     if (req.headers.authorization) {
       headers = { authorization: req.headers.authorization };
-      response = await roomService.post(`/rooms`, req.body, { headers });
+      response = await hotelService.post(`/rooms`, req.body, { headers });
     } else {
-      response = await roomService.post(`/rooms`, req.body);
+      response = await hotelService.post(`/rooms`, req.body);
     }
     res.status(response.status).json(response.data);
   } catch (error) {
@@ -168,9 +164,9 @@ app.put('/rooms/:id', async (req, res) => {
   try {
     if (req.headers.authorization) {
       headers = { authorization: req.headers.authorization };
-      response = await roomService.put(`/rooms/${req.params.id}`, req.body, { headers });
+      response = await hotelService.put(`/rooms/${req.params.id}`, req.body, { headers });
     } else {
-      response = await roomService.put(`/rooms/${req.params.id}`, req.body);
+      response = await hotelService.put(`/rooms/${req.params.id}`, req.body);
     }
     res.status(response.status).json(response.data);
   } catch (error) {
@@ -185,9 +181,9 @@ app.delete('/rooms/:id', async (req, res) => {
   try {
     if (req.headers.authorization) {
       headers = { authorization: req.headers.authorization };
-      response = await roomService.delete(`/rooms/${req.params.id}`, { headers });
+      response = await hotelService.delete(`/rooms/${req.params.id}`, { headers });
     } else {
-      response = await roomService.delete(`/rooms/${req.params.id}`);
+      response = await hotelService.delete(`/rooms/${req.params.id}`);
     }
     res.status(response.status).json(response.data);
   } catch (error) {
