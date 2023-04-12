@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database.config';
 import { Hotel } from './hotel';
-import { Category } from './category';
 
 class Room extends Model {
   public id!: number;
@@ -28,11 +27,6 @@ Room.init(
     categoryCode: {
       type: DataTypes.STRING(2),
       allowNull: false,
-      references: {
-        model: Category,
-        key: 'code'
-      },
-      onDelete: 'CASCADE'
     },
   },
   {

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllCategories, createCategory, getCategoryById, getCategoryByCode as serviceGetCategoryByCode, updateCategory, deleteCategory as serviceDeleteCategory } from '../../../database/src/services/category.service';
+import { getAllCategories, createCategory, getCategoryById, getCategoryByCode as serviceGetCategoryByCode, updateCategory, deleteCategory as serviceDeleteCategory } from '../../database/services/category.service';
 
 export async function getCategories(req: Request, res: Response): Promise<void> {
   console.log("Microservice : Category : GET ALL CATEGORIES")

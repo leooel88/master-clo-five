@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllRooms, createRoom, getRoomById, updateRoom, deleteRoom as serviceDeleteRoom } from '../../../database/src/services/room.service';
+import { getAllRooms, createRoom, getRoomById, updateRoom, deleteRoom as serviceDeleteRoom } from '../../database/services/room.service';
 
 export async function getRooms(req: Request, res: Response): Promise<void> {
   console.log("Microservice : Room : GET ALL ROOMS")
