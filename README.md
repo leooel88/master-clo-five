@@ -150,7 +150,7 @@ In the end, this microservice's use will be to enable the administrators to modi
 Note that this microservice also uses the USER microservice for authentication purposes.
 
 #### RESERVATIONS
-This microservice is used to manage the reservations. It will calculate the prices, using the HOTEL microservice, and the CONFIGURATION microservice.
+This microservice is used to manage the reservations. Using the HOTEL microservice, and the CONFIGURATION microservice, it will calculate the prices, check the availability...
 This microservice uses the USER microservice for authentication purposes.
 
 #### USERS
@@ -170,8 +170,8 @@ The __linkers__ folder contains files, that implement functions in order to make
 We also find a _server.js_ file, which implements a simple express server, which once launched, will enable users to make request to the microservice.
 Finally, we have the _.env.example_ file, presenting the different environment vairables to create in order to make the microservice work, the _package.json_ file, important file in a NodeJs project, and also the _tsconfig.json_ file, used to configure typescript in the project.
 
-### Database Folder
-This folder is structured like so : 
+### Database Folders
+Theese folders are structured like so : 
 First, there is the _database/config/database.config.ts_ file, which is used to create a connection between the microservice and the MySql database. We decided to use the Sequelize ORM to ease the connection with the database.
 Then we have the __database/models__ folder, which contains all the models, corresponding to the different database tables of the microservice.
 We also have the __database/services__ folder, which hosts differnt files, each implementing functions to ease insertion and retrievment of datas in the database. Those functions are then used in the controllers.
@@ -191,6 +191,7 @@ npm install
 
 Furthermore, you need to have a MySql database installed.
 Finally, you need to create all environment variables specified in the .env.example files.
+If you run the project for development puposes, you can use the _projet-hotel/.env.example_ file, but if you are deploying the microservices, use the _.env.example_ files of each microservices.
 
 ##### Launch
 In the _package.json_ file, you can notice different scripts :
@@ -203,11 +204,15 @@ In the _package.json_ file, you can notice different scripts :
 | start:microservices | To start all microservices but not the global API |
 | start:hotel-service | To only start the __hotels__ microservice |
 | start:reservation-service | To only start the __reservation__ microservice |
-| start:room-service | To only start the __room__ microservice |
-| start:category-service | To only start the __category__ microservice |
+| start:configuration-service | To only start the __configuration__ microservice |
+| start:user-service | To only start the __user__ microservice |
 | build | To compile all typescript files, according to the _./tsconfig.json_ configuration |
 | build:watch | To compile all typescript file in dynamic mode, so that any change in the scoped files will trigger another compilation |
-| db:sync | To synchronize the models of the API to the connected database |
+| db:sync | To synchronize and connect all microservices databases |
+| db:sync-hotel-db | To synchronize and connect the hotel microservice database |
+| db:sync-reservation-db | To synchronize and connect the reservation microservice database |
+| db:sync-user-db | To synchronize and connect the user microservice database |
+| db:sync-configuration-db | To synchronize and connect the configuration microservice database |
 
 You can use any of theese scripts by running this command on your terminal : 
 ```
