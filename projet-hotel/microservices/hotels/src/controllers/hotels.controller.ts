@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllHotels, createHotel, getHotelById, updateHotel, deleteHotel as serviceDeleteHotel } from '../../../database/src/services/hotel.service';
+import { getAllHotels, createHotel, getHotelById, updateHotel, deleteHotel as serviceDeleteHotel } from '../../database/services/hotel.service';
 
 export async function getHotels(req: Request, res: Response): Promise<void> {
   console.log("Microservice : Hotel : GET ALL HOTELS")

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllUsers, createUser, getUserById, getUserByUsername as serviceGetUserByUsername, updateUser, deleteUser as serviceDeleteUser } from '../../../database/src/services/user.service';
+import { getAllUsers, createUser, getUserById, getUserByUsername as serviceGetUserByUsername, updateUser, deleteUser as serviceDeleteUser } from '../../database/services/user.service';
 import jwt from 'jsonwebtoken';
 
 const { JWT_SECRET } = process.env
@@ -95,6 +95,7 @@ export async function deleteUser(req: Request, res: Response): Promise<void> {
 }
 
 export async function authenticateUser(req: Request, res: Response): Promise<Response> {
+  console.log("Microservice : User : LOGIN USER")
   const { username, password } = req.body;
 
   if (!username || !password) {

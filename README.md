@@ -12,88 +12,173 @@ projet-hotel
 ├── global-api
 │   └── server.ts
 ├── microservices
-│   ├── categories
-│   │   └── src
-│   │       ├── controllers
-│   │       │   └── categories.controller.ts
-│   │       ├── middlewares
-│   │       │   └── auth.middleware.ts
-│   │       ├── routes
-│   │       │   └── categories.route.ts
-│   │       └── server.ts
+│   ├── configuration
+|   |   ├── database
+│   │   │   ├── config
+│   │   │   │   └── database.config.ts
+│   │   │   ├── models
+│   │   │   │   └── category.ts
+│   │   │   ├── seeds
+│   │   │   ├── services
+│   │   │   │   └── category.service.ts
+│   │   │   └── index.ts
+│   │   ├── src
+│   │   │   ├── controllers
+│   │   │   │   └── categories.controller.ts
+│   │   │   ├── linkers
+│   │   │   │   └── users.linker.ts
+│   │   │   ├── middlewares
+│   │   │   │   └── auth.middleware.ts
+│   │   │   ├── routes
+│   │   │   │   └── categories.route.ts
+│   │   │   ├── types
+│   │   │   │   └── types.d.ts
+│   │   │   └── server.ts
+│   │   ├── .env.example
+│   │   ├── package.json
+│   │   └── tsconfig.json
+|   |
 │   ├── hotels
-│   │   └── src
-│   │       ├── controllers
-│   │       │   └── hotels.controller.ts
-│   │       ├── middlewares
-│   │       │   └── auth.middleware.ts
-│   │       ├── routes
-│   │       │   └── hotels.route.ts
-│   │       └── server.ts
-│   ├── rooms
-│   │   └── src
-│   │       ├── controllers
-│   │       │   └── rooms.controller.ts
-│   │       ├── middlewares
-│   │       │   └── auth.middleware.ts
-│   │       ├── routes
-│   │       │   └── rooms.route.ts
-│   │       └── server.ts
+|   |   ├── database
+│   │   │   ├── config
+│   │   │   │   └── database.config.ts
+│   │   │   ├── models
+│   │   │   │   ├── room.ts
+│   │   │   │   └── hotel.ts
+│   │   │   ├── seeds
+│   │   │   ├── services
+│   │   │   │   ├── room.service.ts
+│   │   │   │   └── hotel.service.ts
+│   │   │   └── index.ts
+│   │   ├── src
+│   │   │   ├── controllers
+│   │   │   │   ├── hotels.controller.ts
+│   │   │   │   └── rooms.controller.ts
+│   │   │   ├── linkers
+│   │   │   │   └── users.linker.ts
+│   │   │   ├── middlewares
+│   │   │   │   └── auth.middleware.ts
+│   │   │   ├── routes
+│   │   │   │   ├── hotels.route.ts
+│   │   │   │   └── rooms.route.ts
+│   │   │   ├── types
+│   │   │   │   └── types.d.ts
+│   │   │   └── server.ts
+│   │   ├── .env.example
+│   │   ├── package.json
+│   │   └── tsconfig.json
+|   |
 │   ├── reservations
-│   │   └── src
-│   │       ├── controllers
-│   │       │   └── reservations.controller.ts
-│   │       ├── middlewares
-│   │       │   └── auth.middleware.ts
-│   │       ├── routes
-│   │       │   └── reservations.route.ts
-│   │       └── server.ts
-│   └── database
-│       └── src
-│           ├── config
-│           │   └── database.config.ts
-│           ├── models
-│           │   ├── category.ts
-│           │   ├── hotel.ts
-│           │   ├── reservation.ts
-│           │   └── room.ts
-│           ├── services
-│           │   ├── category.service.ts
-│           │   ├── hotel.service.ts
-│           │   ├── reservation.service.ts
-│           │   └── room.service.ts
-│           └── index.ts
+|   |   ├── database
+│   │   │   ├── config
+│   │   │   │   └── database.config.ts
+│   │   │   ├── models
+│   │   │   │   └── reservation.ts
+│   │   │   ├── seeds
+│   │   │   ├── services
+│   │   │   │   └── reservation.service.ts
+│   │   │   └── index.ts
+│   │   ├── src
+│   │   │   ├── controllers
+│   │   │   │   └── reservations.controller.ts
+│   │   │   ├── linkers
+│   │   │   │   ├── configurations.linker.ts
+│   │   │   │   ├── hotels.linker.ts
+│   │   │   │   └── users.linker.ts
+│   │   │   ├── middlewares
+│   │   │   │   └── auth.middleware.ts
+│   │   │   ├── routes
+│   │   │   │   └── reservations.route.ts
+│   │   │   ├── types
+│   │   │   │   └── types.d.ts
+│   │   │   └── server.ts
+│   │   ├── .env.example
+│   │   ├── package.json
+│   │   └── tsconfig.json
+|   |
+│   └── users
+|       ├── database
+│       │   ├── config
+│       │   │   └── database.config.ts
+│       │   ├── models
+│       │   │   └── user.ts
+│       │   ├── seeds
+│       │   ├── services
+│       │   │   └── user.service.ts
+│       │   └── index.ts
+│       ├── src
+│       │   ├── controllers
+│       │   │   └── users.controller.ts
+│       │   ├── middlewares
+│       │   │   └── auth.middleware.ts
+│       │   ├── routes
+│       │   │   └── users.route.ts
+│       │   ├── types
+│       │   │   └── types.d.ts
+│       │   └── server.ts
+│       ├── .env.example
+│       ├── package.json
+│       └── tsconfig.json
+|    
 ├── tests
 │   └── integration
 │       ├── hotels.test.ts
 │       ├── reservations.test.ts
 │       ├── rooms.test.ts
 │       └── categories.test.ts
-├── .env
+├── .env.example
 ├── tsconfig.json
 ├── package.json
 └── .gitignore
 ```
 
 The code is composed of : 
- - 4 microservices, stored in the microservices/categories, the microservices/hotels, the microservices/rooms, and the _microservices/reservations_ folders.
- - 1 database microservice, which implements functions used by the microservices to make requests to the database
+ - 4 microservices, stored in the _microservices/configuration_, the _microservices/hotels_, the _microservices/reservations_, and the _microservices/users_ folders.
  - 1 _global-api folder_, which contains the _index.ts_ file, which is the global API server.
- 
-### Microservices
-The 4 microservices are implemented like so : 
-We first have the _src/server.ts_ file, which implements a simple express server and include the microservice's router (defined in the _src/routes/microservice.route.ts_ file). Then, there is the _src/controllers_ folder which contains the _src/controllers/microservice.controller.ts_ file. This file uses the database's service classes to retrieve or insert datas in the database, and finally send the response back to the client.
-Finally, each of the microservices have a _src/middlewares_ folder, each containing a _auth.middleware.ts_ file. They implement an authentication middleware that uses the 'Authorization' field of the request's header, and verify it.
 
-### DatabaseService
-This DatabaseService is implemented like so : 
-First, there is the _src/config/database.config.ts_, which is used to create a connection between the API and the MySql database. We decided to use the Sequelize ORM to ease the connection with the database.
-Then we have the _src/models_ folder, which contains all the models, corresponding to the different database tables.
-We also have the _src/services_ folder, which implements a class, used to join all models. It also is used to declare the different database methods that will be usefull for the rest of the API, and especially, for the different microservices.
+We decided to divide the business logic into four microservices :
+
+#### HOTELS
+This microservice servs as catalog microservice. It will manage the hotel creations, and the rooms creation inside those hotels.
+It is linked to the USER microservice, for authentication purposes, and to the CONFIGURATION microservice.
+
+#### CONFIGURATION
+This microservice is used to configure global variables, used in the whole hotel managment.
+For example, it hosts the room categories policy, like what type of room can be created in a hotel, costing what price, with what maximum person number...
+It also hosts the price policy, like for example for the extra services prices (breakfast price, romance pack price...).
+In the end, this microservice's use will be to enable the administrators to modify the global policy, without touching to the reservations, or to the hotels themselves.
+Note that this microservice also uses the USER microservice for authentication purposes.
+
+#### RESERVATIONS
+This microservice is used to manage the reservations. Using the HOTEL microservice, and the CONFIGURATION microservice, it will calculate the prices, check the availability...
+This microservice uses the USER microservice for authentication purposes.
+
+#### USERS
+This microservice is used to manage the access to the API. It will host the implementation of the authentication logic, as well as for the creation and modification of users of the database.
+
+#### Authentication Logic
+This project implements a simple ADMIN/NON-ADMIN/NON-AUTHENTICATED authentication policy :
+ - A NON authenticated user will only have access to the LOGIN route of the USERS microservice (_http://...../users/login_)
+ - An authenticated user will only have access to the GET routes of the HOTELS, CONFIGURATION, and RESERVATION microservices, in order to retrieve datas. Furthermore, it will also be able to use the POST, PUT and DELETE routes of the RESERVATIONS microservice, but only if it concerns a reservation owned by himself. As for the USER microservice, he will be able to use all GET, POST, PUT and DELETE routes, but only if it concerns his own account
+ - Finally, an authenticated user with ADMIN accesses will be able to use any route, of any microservice.
+ 
+### Microservices structure
+The 4 microservices are implemented like so :
+We first have the database folder, containing the files needed for the database managment of the microservice. Their way of working is described later.
+Then, there is the src folder, containing a __controllers__ folder, used to host the controllers of the microservice, a __routes__ folder, used to host the routers of the microservice, a __types__ folder, containing the files in which all types used in the microservice (usually, the types of the data that are transfered from other microservice, in order to keep the typing all over the code), a __linkers__ folder, and a __middlewares__, that contains the middlewares used in the microservice (mainly the authentication middleware, used to authenticate a user).
+The __linkers__ folder contains files, that implement functions in order to make requests from the current microservice, to another microservice. To do so, each linker will instanciate an axios client, which will be used to make requests to other microservice's APIs.
+We also find a _server.js_ file, which implements a simple express server, which once launched, will enable users to make request to the microservice.
+Finally, we have the _.env.example_ file, presenting the different environment vairables to create in order to make the microservice work, the _package.json_ file, important file in a NodeJs project, and also the _tsconfig.json_ file, used to configure typescript in the project.
+
+### Database Folders
+Theese folders are structured like so : 
+First, there is the _database/config/database.config.ts_ file, which is used to create a connection between the microservice and the MySql database. We decided to use the Sequelize ORM to ease the connection with the database.
+Then we have the __database/models__ folder, which contains all the models, corresponding to the different database tables of the microservice.
+We also have the __database/services__ folder, which hosts differnt files, each implementing functions to ease insertion and retrievment of datas in the database. Those functions are then used in the controllers.
 Finally, the _src/index.ts_ file that is used to synchronise the database with the models created in the database microservice.
 
 ### global-api
-The _global-api_ folder contains one _src/index.ts_ file, which implements an express server. This express server will be the only one that can be accessed from the outside. It will be used to dispatch the requests to the different microservices, using axios to create a client for each of the microservices, and then, to make the request to the different routes of those microservices.
+The _global-api_ folder contains one _src/index.ts_ file, which implements an express server. This express server's use is to create a single point of access, to ease testing. It is not mandatory to use it. It will be used to dispatch the requests to the different microservices, using axios to create a client for each of the microservices, and then, to make the request to the different routes of those microservices.
 
 ### Usage
 ##### Pre-requisites
@@ -105,7 +190,8 @@ npm install
 ```
 
 Furthermore, you need to have a MySql database installed.
-Finally, you need to create a .env file, using the .env.example file.
+Finally, you need to create all environment variables specified in the .env.example files.
+If you run the project for development puposes, you can use the _projet-hotel/.env.example_ file, but if you are deploying the microservices, use the _.env.example_ files of each microservices.
 
 ##### Launch
 In the _package.json_ file, you can notice different scripts :
@@ -118,11 +204,15 @@ In the _package.json_ file, you can notice different scripts :
 | start:microservices | To start all microservices but not the global API |
 | start:hotel-service | To only start the __hotels__ microservice |
 | start:reservation-service | To only start the __reservation__ microservice |
-| start:room-service | To only start the __room__ microservice |
-| start:category-service | To only start the __category__ microservice |
+| start:configuration-service | To only start the __configuration__ microservice |
+| start:user-service | To only start the __user__ microservice |
 | build | To compile all typescript files, according to the _./tsconfig.json_ configuration |
 | build:watch | To compile all typescript file in dynamic mode, so that any change in the scoped files will trigger another compilation |
-| db:sync | To synchronize the models of the API to the connected database |
+| db:sync | To synchronize and connect all microservices databases |
+| db:sync-hotel-db | To synchronize and connect the hotel microservice database |
+| db:sync-reservation-db | To synchronize and connect the reservation microservice database |
+| db:sync-user-db | To synchronize and connect the user microservice database |
+| db:sync-configuration-db | To synchronize and connect the configuration microservice database |
 
 You can use any of theese scripts by running this command on your terminal : 
 ```

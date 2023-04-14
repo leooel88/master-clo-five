@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getUserById } from '../../../database/src/services/user.service';
-import { AuthenticatedRequest } from '../../../../global/types'
+import { getUserById } from '../linkers/users.linker';
+import { AuthenticatedRequest } from '../types/types'
 
 const { JWT_SECRET } = process.env
 
 export async function authUser(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   const token = req.header('Authorization');
-
   if (!token) {
     res.status(401).json({ error: 'Accès non autorisé' });
     return;
@@ -15,7 +14,20 @@ export async function authUser(req: AuthenticatedRequest, res: Response, next: N
 
   try {
     const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
-    const user = await getUserById(decoded.id);
+    
+    if (req.user) {
+      if (req.user.id != decoded.id) {
+        res.status(401).json({ error: 'Accès non autorisé' });
+        return;
+      }
+      next();
+      return;
+    }
+
+    const user = await getUserById(req, decoded.id).catch((error) => {
+      res.status(500).json({error: 'Internal server error : User microservice not working'})
+      return;
+    });
 
     if (!user) {
       res.status(401).json({ error: 'Token invalide' });
@@ -39,7 +51,17 @@ export async function authAdmin(req: AuthenticatedRequest, res: Response, next: 
 
   try {
     const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
-    const user = await getUserById(decoded.id);
+
+    if (req.user) {
+      if (req.user.id != decoded.id || req.user.role != "ADMIN") {
+        res.status(401).json({ error: 'Accès non autorisé' });
+        return;
+      }
+      next();
+      return;
+    }
+
+    const user = await getUserById(req, decoded.id);
 
     if (!user) {
       res.status(401).json({ error: 'Token invalide' });
