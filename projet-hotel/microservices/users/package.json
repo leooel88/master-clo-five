@@ -4,18 +4,14 @@
   "description": "API de réservation d'hôtel",
   "main": "index.js",
   "scripts": {
-    "start": "npm run start:microservices & npm run start:api",
+    "start": "npm run start:microservice",
     "clean:dist": "rimraf dist",
-    "start:api": "node dist/global-api/server.js",
-    "start:microservices": "npm run start:hotel-service & npm run start:reservation-service & npm run start:room-service & npm run start:category-service & npm run start:user-service",
-    "start:hotel-service": "node dist/microservices/hotels/src/server.js",
-    "start:reservation-service": "node dist/microservices/reservations/src/server.js",
-    "start:room-service": "node dist/microservices/rooms/src/server.js",
-    "start:category-service": "node dist/microservices/categories/src/server.js",
-    "start:user-service": "node dist/microservices/users/src/server.js",
+    "start:microservice": "npm run start:user-service",
+    "start:user-service": "node dist/src/server.js",
     "build": "tsc",
     "build:watch": "tsc -w",
-    "db:sync": "ts-node dist/microservices/database/src/index.js"
+    "db:sync": "npm run db:sync-users-db",
+    "db:sync-user-db": "ts-node dist/database/index.js"
   },
   "dependencies": {
     "@types/express": "^4.17.13",
