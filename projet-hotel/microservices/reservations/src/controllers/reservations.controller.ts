@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
+import { Op } from 'sequelize';
+
 import { getAllReservations, createReservation, getReservationById, updateReservation, deleteReservation as serviceDeleteReservation, getReservationByUserFullName as serviceGetReservationByUserFullName } from '../../database/services/reservation.service';
 import { getRoomById } from '../linkers/hotels.linker';
 import { getCategoryByCode } from '../linkers/configurations.linker';
 import { AuthenticatedRequest } from '../types/types'
+import { Reservation } from '../../database/models/reservation';
 
 export async function getReservations(req: AuthenticatedRequest, res: Response): Promise<void> {
   console.log("Microservice : Reservation : GET ALL RESERVATIONS")
@@ -44,6 +47,40 @@ export async function getReservationByUserFullName(req: AuthenticatedRequest, re
     }
 
     res.json(reservation);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getReservationsByHotelIdAndPeriod(req: Request, res: Response): Promise<void> {
+  console.log("Microservice : Reservation : GET RESERVATION BY HOTELID & PERIOD")
+  
+  const hotelId = Number(req.params.hotelId);
+
+  try {
+    console.log(req.params.periodStart)
+    console.log(req.params.periodStart)
+    const periodStart = new Date(Number(req.params.periodStart));
+    const periodEnd = new Date(Number(req.params.periodEnd));
+
+    const reservations = await Reservation.findAll({
+      where: {
+        roomId: hotelId,
+        [Op.or]: [
+          {
+            checkInDate: {
+              [Op.between]: [periodStart, periodEnd],
+            },
+          },
+          {
+            checkOutDate: {
+              [Op.between]: [periodStart, periodEnd],
+            },
+          },
+        ],
+      },
+    });
+    res.json({reservations})
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

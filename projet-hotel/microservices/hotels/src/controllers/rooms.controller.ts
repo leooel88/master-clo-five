@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllRooms, createRoom, getRoomById, updateRoom, deleteRoom as serviceDeleteRoom } from '../../database/services/room.service';
+import { getAllRooms, getRoomByHotelId, createRoom, getRoomById, updateRoom, deleteRoom as serviceDeleteRoom } from '../../database/services/room.service';
 
 export async function getRooms(req: Request, res: Response): Promise<void> {
   console.log("Microservice : Room : GET ALL ROOMS")
@@ -20,6 +20,24 @@ export async function getRoom(req: Request, res: Response): Promise<void> {
 
     if (!room) {
       res.status(404).json({ error: 'Room introuvable' });
+      return;
+    }
+
+    res.json(room);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getRoomsByHotel(req: Request, res: Response): Promise<void> {
+  console.log("Microservice : Room : GET ROOM BY HOTEL ID")
+  const hotelId = Number(req.params.hotelId);
+
+  try {
+    const room = await getRoomByHotelId(hotelId);
+
+    if (!room) {
+      res.status(404).json({ error: 'Rooms introuvables' });
       return;
     }
 

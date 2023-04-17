@@ -32,6 +32,21 @@ export interface User {
   role: string;
 }
 
+export interface Reservation {
+  id: number;
+  userFullName: string;
+  roomId: number;
+  moduledPrice: number;
+  totalPrice: number;
+  parking: boolean;
+  kidBed: boolean;
+  romancePack: boolean;
+  breakfast: boolean;
+  checkInDate: Date;
+  checkOutDate: Date;
+  numberPerson: number;
+}
+
 export interface AuthenticatedRequest extends Request {
   user: User;
 }

@@ -16,6 +16,11 @@ export async function getRoomById(id: number): Promise<Room | null> {
   return room;
 }
 
+export async function getRoomByHotelId(hotelId: number): Promise<Room[] | null> {
+  const rooms = await Room.findAll({ where: { hotelId: hotelId } });
+  return rooms;
+}
+
 export async function updateRoom(id: number, roomData: Partial<Room>): Promise<Room | null> {
   const room = await Room.findByPk(id);
 
