@@ -171,6 +171,10 @@ export async function putReservation(req: AuthenticatedRequest, res: Response): 
   const reservationId = Number(req.params.id);
   const reservationData = req.body;
   let savedReservation: any = {};
+  if (reservationData.userFullName && reservationData.userFullName) {
+    savedReservation.userFullName = reservationData.userFullName
+  }
+
   if (reservationData.moduledPrice || reservationData.totalPrice) {
     res.status(400).json({ error: 'Les prix sont calculés automatiquement, vous ne pouvez pas les ajouter à la requête' })
   }
