@@ -1,0 +1,1677 @@
+{
+	"info": {
+		"_postman_id": "6e1a6f92-aa5d-4dfb-a822-e96df79082f1",
+		"name": "TIC-CLO5",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "HOTEL TESTS",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Login Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Extract the token from the response body\r",
+									"const requestResponse = pm.response.json();\r",
+									"const token = requestResponse.token;\r",
+									"\r",
+									"// Check the presence and format of the token in the response\r",
+									"pm.test(\"🟢 Login Test - Token format is valid\", function () {\r",
+									"    pm.expect(token).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Save the token in the environment variable\r",
+									"pm.environment.set(\"TOKEN\", \"Bearer \" + token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{USERNAME}}\",\r\n    \"password\": \"{{PASSWORD}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{USER_HOST}}/users/login",
+							"host": [
+								"{{USER_HOST}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post hotel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Hotel Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const hotel = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created hotel\r",
+									"pm.test(\"🟢 Create Hotel Test - Hotel properties are correct\", function () {\r",
+									"    pm.expect(hotel).to.have.property('id');\r",
+									"    pm.expect(hotel.id).to.be.a('number');\r",
+									"    pm.expect(hotel).to.have.property('name', 'Hotel 1');\r",
+									"    pm.expect(hotel).to.have.property('address', \"22 rue de la bergerie, Amiens\");\r",
+									"    pm.expect(hotel).to.have.property('phoneNumber', \"0111111111\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_HOTEL_ID\", hotel.id);\r",
+									"pm.environment.set(\"NEW_HOTEL_NAME\", hotel.name);\r",
+									"pm.environment.set(\"NEW_HOTEL_ADDRESS\", hotel.address);\r",
+									"pm.environment.set(\"NEW_HOTEL_PHONENUMBER\", hotel.phoneNumber);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hotel 1\",\r\n    \"address\": \"22 rue de la bergerie, Amiens\",\r\n    \"phoneNumber\": \"0111111111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get hotels",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Retrieve Hotels Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const hotels = pm.response.json();\r",
+									"\r",
+									"// Check if the response is an array\r",
+									"pm.test(\"🟢 Retrieve Hotels Test - Response is an array\", function () {\r",
+									"    pm.expect(hotels).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"// Check the structure and properties of each hotel object in the array\r",
+									"pm.test(\"🟢 Retrieve Hotels Test - Hotel object structure and properties are correct\", function () {\r",
+									"    hotels.forEach(function (hotel) {\r",
+									"        pm.expect(hotel).to.be.an('object');\r",
+									"        pm.expect(hotel).to.have.property('id');\r",
+									"        pm.expect(hotel).to.have.property('name');\r",
+									"        pm.expect(hotel).to.have.property('address');\r",
+									"        pm.expect(hotel).to.have.property('phoneNumber');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const newHotel = hotels.find(hotel => hotel.id == pm.environment.get(\"NEW_HOTEL_ID\"))\r",
+									"\r",
+									"pm.test(\"🟢 Retrieve Hotels Test - Check newly created hotel\", function () {\r",
+									"    pm.expect(newHotel).to.have.property('name', pm.environment.get(\"NEW_HOTEL_NAME\"))\r",
+									"    pm.expect(newHotel).to.have.property('address', pm.environment.get(\"NEW_HOTEL_ADDRESS\"))\r",
+									"    pm.expect(newHotel).to.have.property('phoneNumber', pm.environment.get(\"NEW_HOTEL_PHONENUMBER\"))\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update new hotel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Hotel Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Hotel Test - Response body is not empty\", function () {\r",
+									"    pm.response.to.have.jsonBody();\r",
+									"});\r",
+									"\r",
+									"const updatedHotel = pm.response.json();\r",
+									"\r",
+									"pm.test(\"🟢 Update Hotel Test - Response contains updated hotel properties\", function () {\r",
+									"    pm.expect(updatedHotel).to.have.property('id');\r",
+									"    pm.expect(updatedHotel.id).to.be.a('number');\r",
+									"    pm.expect(updatedHotel).to.have.property('name', 'Hotel 2');\r",
+									"    pm.expect(updatedHotel).to.have.property('address', \"23 rue de la bergerie, Amiens\");\r",
+									"    pm.expect(updatedHotel).to.have.property('phoneNumber', \"0111111112\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hotel 2\",\r\n    \"address\": \"23 rue de la bergerie, Amiens\",\r\n    \"phoneNumber\": \"0111111112\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels/{{NEW_HOTEL_ID}}",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels",
+								"{{NEW_HOTEL_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete new hotel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Hotel Test - Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Hotel Test - Response body is empty\", function () {\r",
+									"    pm.expect(pm.response.text()).to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels/{{NEW_HOTEL_ID}}",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels",
+								"{{NEW_HOTEL_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CONFIGURATION TESTS",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Login Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Extract the token from the response body\r",
+									"const requestResponse = pm.response.json();\r",
+									"const token = requestResponse.token;\r",
+									"\r",
+									"// Check the presence and format of the token in the response\r",
+									"pm.test(\"🟢 Login Test - Token format is valid\", function () {\r",
+									"    pm.expect(token).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Save the token in the environment variable\r",
+									"pm.environment.set(\"TOKEN\", \"Bearer \" + token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{USERNAME}}\",\r\n    \"password\": \"{{PASSWORD}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{USER_HOST}}/users/login",
+							"host": [
+								"{{USER_HOST}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Category Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const category = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Category Test - Category properties are correct\", function () {\r",
+									"    pm.expect(category).to.have.property('id');\r",
+									"    pm.expect(category.id).to.be.a('number');\r",
+									"    pm.expect(category).to.have.property('code', 'SR');\r",
+									"    pm.expect(category).to.have.property('name', \"Suite présidentielle\");\r",
+									"    pm.expect(category).to.have.property('capacity', \"5\");\r",
+									"    pm.expect(category).to.have.property('basePrice', \"1000\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_CATEGORY_ID\", category.id);\r",
+									"pm.environment.set(\"NEW_CATEGORY_NAME\", category.name);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CODE\", category.code);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CAPACITY\", Number(category.capacity));\r",
+									"pm.environment.set(\"NEW_CATEGORY_BASEPRICE\", Number(category.basePrice));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"SR\",\r\n    \"name\": \"Suite présidentielle\",\r\n    \"capacity\": \"5\",\r\n    \"basePrice\": \"1000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Retrieve Categories Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const categories = pm.response.json();\r",
+									"\r",
+									"// Check if the response is an array\r",
+									"pm.test(\"🟢 Retrieve Categories Test - Response is an array\", function () {\r",
+									"    pm.expect(categories).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"// Check the structure and properties of each hotel object in the array\r",
+									"pm.test(\"🟢 Retrieve Categories Test - Category object structure and properties are correct\", function () {\r",
+									"    categories.forEach(function (category) {\r",
+									"        pm.expect(category).to.be.an('object');\r",
+									"        pm.expect(category).to.have.property('id');\r",
+									"        pm.expect(category).to.have.property('code');\r",
+									"        pm.expect(category).to.have.property('name');\r",
+									"        pm.expect(category).to.have.property('capacity');\r",
+									"        pm.expect(category).to.have.property('basePrice');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const newCategory = categories.find(category => category.id == pm.environment.get(\"NEW_CATEGORY_ID\"))\r",
+									"\r",
+									"pm.test(\"🟢 Retrieve Categories Test - Check newly created category\", function () {\r",
+									"    pm.expect(newCategory).to.have.property('name', pm.environment.get(\"NEW_CATEGORY_NAME\"))\r",
+									"    pm.expect(newCategory).to.have.property('code', pm.environment.get(\"NEW_CATEGORY_CODE\"))\r",
+									"    pm.expect(newCategory).to.have.property('capacity', pm.environment.get(\"NEW_CATEGORY_CAPACITY\"))\r",
+									"    pm.expect(newCategory).to.have.property('basePrice', pm.environment.get(\"NEW_CATEGORY_BASEPRICE\"))})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update new category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Category Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Category Test - Response body is not empty\", function () {\r",
+									"    pm.response.to.have.jsonBody();\r",
+									"});\r",
+									"\r",
+									"const updatedCategory = pm.response.json();\r",
+									"\r",
+									"pm.test(\"🟢 Update Hotel Test - Response contains updated category properties\", function () {\r",
+									"    pm.expect(updatedCategory).to.have.property('id');\r",
+									"    pm.expect(updatedCategory.id).to.be.a('number');\r",
+									"    pm.expect(updatedCategory).to.have.property('name', 'Grande suite');\r",
+									"    pm.expect(updatedCategory).to.have.property('code', \"GS\");\r",
+									"    pm.expect(updatedCategory).to.have.property('capacity', \"4\");\r",
+									"    pm.expect(updatedCategory).to.have.property('basePrice', \"800\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"GS\",\r\n    \"name\": \"Grande suite\",\r\n    \"capacity\": \"4\",\r\n    \"basePrice\": \"800\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories/{{NEW_CATEGORY_ID}}",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories",
+								"{{NEW_CATEGORY_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Category Test - Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Category Test - Response body is empty\", function () {\r",
+									"    pm.expect(pm.response.text()).to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories/{{NEW_CATEGORY_ID}}",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories",
+								"{{NEW_CATEGORY_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ROOM TESTS",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Login Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Extract the token from the response body\r",
+									"const requestResponse = pm.response.json();\r",
+									"const token = requestResponse.token;\r",
+									"\r",
+									"// Check the presence and format of the token in the response\r",
+									"pm.test(\"🟢 Login Test - Token format is valid\", function () {\r",
+									"    pm.expect(token).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Save the token in the environment variable\r",
+									"pm.environment.set(\"TOKEN\", \"Bearer \" + token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{USERNAME}}\",\r\n    \"password\": \"{{PASSWORD}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{USER_HOST}}/users/login",
+							"host": [
+								"{{USER_HOST}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial hotel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Hotel Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const hotel = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created hotel\r",
+									"pm.test(\"🟢 Create Hotel Test - Hotel properties are correct\", function () {\r",
+									"    pm.expect(hotel).to.have.property('id');\r",
+									"    pm.expect(hotel.id).to.be.a('number');\r",
+									"    pm.expect(hotel).to.have.property('name', 'Hotel 1');\r",
+									"    pm.expect(hotel).to.have.property('address', \"22 rue de la bergerie, Amiens\");\r",
+									"    pm.expect(hotel).to.have.property('phoneNumber', \"0111111111\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_HOTEL_ID\", hotel.id);\r",
+									"pm.environment.set(\"NEW_HOTEL_NAME\", hotel.name);\r",
+									"pm.environment.set(\"NEW_HOTEL_ADDRESS\", hotel.address);\r",
+									"pm.environment.set(\"NEW_HOTEL_PHONENUMBER\", hotel.phoneNumber);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hotel 1\",\r\n    \"address\": \"22 rue de la bergerie, Amiens\",\r\n    \"phoneNumber\": \"0111111111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Category Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const category = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Category Test - Category properties are correct\", function () {\r",
+									"    pm.expect(category).to.have.property('id');\r",
+									"    pm.expect(category.id).to.be.a('number');\r",
+									"    pm.expect(category).to.have.property('code', 'SR');\r",
+									"    pm.expect(category).to.have.property('name', \"Suite présidentielle\");\r",
+									"    pm.expect(category).to.have.property('capacity', \"5\");\r",
+									"    pm.expect(category).to.have.property('basePrice', \"1000\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_CATEGORY_ID\", category.id);\r",
+									"pm.environment.set(\"NEW_CATEGORY_NAME\", category.name);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CODE\", category.code);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CAPACITY\", Number(category.capacity));\r",
+									"pm.environment.set(\"NEW_CATEGORY_BASEPRICE\", Number(category.basePrice));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"SR\",\r\n    \"name\": \"Suite présidentielle\",\r\n    \"capacity\": \"5\",\r\n    \"basePrice\": \"1000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Room Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const room = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Room Test - Room properties are correct\", function () {\r",
+									"    pm.expect(room).to.have.property('id');\r",
+									"    pm.expect(room.id).to.be.a('number');\r",
+									"    pm.expect(room).to.have.property('hotelId', String(pm.environment.get(\"NEW_HOTEL_ID\")));\r",
+									"    pm.expect(room).to.have.property('categoryCode', pm.environment.get(\"NEW_CATEGORY_CODE\"));\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_ROOM_ID\", room.id);\r",
+									"pm.environment.set(\"NEW_ROOM_HOTELID\", Number(room.hotelId));\r",
+									"pm.environment.set(\"NEW_ROOM_CATEGORYCODE\", room.categoryCode);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"hotelId\": \"{{NEW_HOTEL_ID}}\",\r\n    \"categoryCode\": \"{{NEW_CATEGORY_CODE}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/rooms",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get rooms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Retrieve Rooms Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const rooms = pm.response.json();\r",
+									"\r",
+									"// Check if the response is an array\r",
+									"pm.test(\"🟢 Retrieve Rooms Test - Response is an array\", function () {\r",
+									"    pm.expect(rooms).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"// Check the structure and properties of each hotel object in the array\r",
+									"pm.test(\"🟢 Retrieve Rooms Test - Room object structure and properties are correct\", function () {\r",
+									"    rooms.forEach(function (room) {\r",
+									"        pm.expect(room).to.be.an('object');\r",
+									"        pm.expect(room).to.have.property('id');\r",
+									"        pm.expect(room).to.have.property('hotelId');\r",
+									"        pm.expect(room).to.have.property('categoryCode');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const newRoom = rooms.find(room => room.id == pm.environment.get(\"NEW_ROOM_ID\"))\r",
+									"\r",
+									"pm.test(\"🟢 Retrieve Rooms Test - Check newly created room\", function () {\r",
+									"    pm.expect(newRoom).to.have.property('hotelId', pm.environment.get(\"NEW_ROOM_HOTELID\"))\r",
+									"    pm.expect(newRoom).to.have.property('categoryCode', pm.environment.get(\"NEW_ROOM_CATEGORYCODE\"))\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{HOTEL_HOST}}/rooms",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial hotel 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Hotel Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const hotel = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created hotel\r",
+									"pm.test(\"🟢 Create Hotel Test - Hotel properties are correct\", function () {\r",
+									"    pm.expect(hotel).to.have.property('id');\r",
+									"    pm.expect(hotel.id).to.be.a('number');\r",
+									"    pm.expect(hotel).to.have.property('name', 'Hotel 2');\r",
+									"    pm.expect(hotel).to.have.property('address', \"23 rue de la bergerie, Amiens\");\r",
+									"    pm.expect(hotel).to.have.property('phoneNumber', \"0222222222\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_HOTEL_ID\", hotel.id);\r",
+									"pm.environment.set(\"NEW_HOTEL_NAME\", hotel.name);\r",
+									"pm.environment.set(\"NEW_HOTEL_ADDRESS\", hotel.address);\r",
+									"pm.environment.set(\"NEW_HOTEL_PHONENUMBER\", hotel.phoneNumber);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hotel 2\",\r\n    \"address\": \"23 rue de la bergerie, Amiens\",\r\n    \"phoneNumber\": \"0222222222\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial category 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Category Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const category = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Category Test - Category properties are correct\", function () {\r",
+									"    pm.expect(category).to.have.property('id');\r",
+									"    pm.expect(category.id).to.be.a('number');\r",
+									"    pm.expect(category).to.have.property('code', 'GS');\r",
+									"    pm.expect(category).to.have.property('name', \"Grande suite\");\r",
+									"    pm.expect(category).to.have.property('capacity', \"4\");\r",
+									"    pm.expect(category).to.have.property('basePrice', \"800\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_CATEGORY_ID\", category.id);\r",
+									"pm.environment.set(\"NEW_CATEGORY_NAME\", category.name);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CODE\", category.code);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CAPACITY\", Number(category.capacity));\r",
+									"pm.environment.set(\"NEW_CATEGORY_BASEPRICE\", Number(category.basePrice));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"GS\",\r\n    \"name\": \"Grande suite\",\r\n    \"capacity\": \"4\",\r\n    \"basePrice\": \"800\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update new room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Room Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Room Test - Response body is not empty\", function () {\r",
+									"    pm.response.to.have.jsonBody();\r",
+									"});\r",
+									"\r",
+									"const updatedRoom = pm.response.json();\r",
+									"\r",
+									"pm.test(\"🟢 Update Room Test - Response contains updated room properties\", function () {\r",
+									"    pm.expect(updatedRoom).to.have.property('id');\r",
+									"    pm.expect(updatedRoom.id).to.be.a('number');\r",
+									"    pm.expect(updatedRoom).to.have.property('hotelId', String(pm.environment.get(\"NEW_HOTEL_ID\")));\r",
+									"    pm.expect(updatedRoom).to.have.property('categoryCode', pm.environment.get(\"NEW_CATEGORY_CODE\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"hotelId\": \"{{NEW_HOTEL_ID}}\",\r\n    \"categoryCode\": \"{{NEW_CATEGORY_CODE}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/rooms/{{NEW_ROOM_ID}}",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"rooms",
+								"{{NEW_ROOM_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Room Test - Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Room Test - Response body is empty\", function () {\r",
+									"    pm.expect(pm.response.text()).to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{HOTEL_HOST}}/rooms/{{NEW_ROOM_ID}}",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"rooms",
+								"{{NEW_ROOM_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RESERVATION TESTS",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Login Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Extract the token from the response body\r",
+									"const requestResponse = pm.response.json();\r",
+									"const token = requestResponse.token;\r",
+									"\r",
+									"// Check the presence and format of the token in the response\r",
+									"pm.test(\"🟢 Login Test - Token format is valid\", function () {\r",
+									"    pm.expect(token).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Save the token in the environment variable\r",
+									"pm.environment.set(\"TOKEN\", \"Bearer \" + token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{USERNAME}}\",\r\n    \"password\": \"{{PASSWORD}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{USER_HOST}}/users/login",
+							"host": [
+								"{{USER_HOST}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial hotel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Hotel Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const hotel = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created hotel\r",
+									"pm.test(\"🟢 Create Hotel Test - Hotel properties are correct\", function () {\r",
+									"    pm.expect(hotel).to.have.property('id');\r",
+									"    pm.expect(hotel.id).to.be.a('number');\r",
+									"    pm.expect(hotel).to.have.property('name', 'Hotel 1');\r",
+									"    pm.expect(hotel).to.have.property('address', \"22 rue de la bergerie, Amiens\");\r",
+									"    pm.expect(hotel).to.have.property('phoneNumber', \"0111111111\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_HOTEL_ID\", hotel.id);\r",
+									"pm.environment.set(\"NEW_HOTEL_NAME\", hotel.name);\r",
+									"pm.environment.set(\"NEW_HOTEL_ADDRESS\", hotel.address);\r",
+									"pm.environment.set(\"NEW_HOTEL_PHONENUMBER\", hotel.phoneNumber);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Hotel 1\",\r\n    \"address\": \"22 rue de la bergerie, Amiens\",\r\n    \"phoneNumber\": \"0111111111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/hotels",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"hotels"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Category Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const category = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Category Test - Category properties are correct\", function () {\r",
+									"    pm.expect(category).to.have.property('id');\r",
+									"    pm.expect(category.id).to.be.a('number');\r",
+									"    pm.expect(category).to.have.property('code', 'SR');\r",
+									"    pm.expect(category).to.have.property('name', \"Suite présidentielle\");\r",
+									"    pm.expect(category).to.have.property('capacity', \"5\");\r",
+									"    pm.expect(category).to.have.property('basePrice', \"1000\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_CATEGORY_ID\", category.id);\r",
+									"pm.environment.set(\"NEW_CATEGORY_NAME\", category.name);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CODE\", category.code);\r",
+									"pm.environment.set(\"NEW_CATEGORY_CAPACITY\", Number(category.capacity));\r",
+									"pm.environment.set(\"NEW_CATEGORY_BASEPRICE\", Number(category.basePrice));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"SR\",\r\n    \"name\": \"Suite présidentielle\",\r\n    \"capacity\": \"5\",\r\n    \"basePrice\": \"1000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{CONFIGURATION_HOST}}/categories",
+							"host": [
+								"{{CONFIGURATION_HOST}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post initial room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Room Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const room = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Room Test - Room properties are correct\", function () {\r",
+									"    pm.expect(room).to.have.property('id');\r",
+									"    pm.expect(room.id).to.be.a('number');\r",
+									"    pm.expect(room).to.have.property('hotelId', String(pm.environment.get(\"NEW_HOTEL_ID\")));\r",
+									"    pm.expect(room).to.have.property('categoryCode', pm.environment.get(\"NEW_CATEGORY_CODE\"));\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_ROOM_ID\", room.id);\r",
+									"pm.environment.set(\"NEW_ROOM_HOTELID\", Number(room.hotelId));\r",
+									"pm.environment.set(\"NEW_ROOM_CATEGORYCODE\", room.categoryCode);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"hotelId\": \"{{NEW_HOTEL_ID}}\",\r\n    \"categoryCode\": \"{{NEW_CATEGORY_CODE}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOTEL_HOST}}/rooms",
+							"host": [
+								"{{HOTEL_HOST}}"
+							],
+							"path": [
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post reservation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Create Reservation Test - Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const reservation = pm.response.json();\r",
+									"\r",
+									"// Check the properties of the created category\r",
+									"pm.test(\"🟢 Create Reservation Test - Reservation properties are correct\", function () {\r",
+									"    pm.expect(reservation).to.have.property('id');\r",
+									"    pm.expect(reservation.id).to.be.a('number');\r",
+									"    pm.expect(reservation).to.have.property('userFullName', \"Leo RESSAYRE\");\r",
+									"    pm.expect(reservation).to.have.property('roomId', String(pm.environment.get(\"NEW_ROOM_ID\")));\r",
+									"    pm.expect(reservation).to.have.property('numberPerson', \"1\");\r",
+									"    pm.expect(reservation).to.have.property('moduledPrice', 1710);\r",
+									"    pm.expect(reservation).to.have.property('totalPrice', 1740);\r",
+									"    pm.expect(reservation).to.have.property('parking', false);\r",
+									"    pm.expect(reservation).to.have.property('kidBed', false);\r",
+									"    pm.expect(reservation).to.have.property('romancePack', false);\r",
+									"    pm.expect(reservation).to.have.property('breakfast', true);\r",
+									"    pm.expect(reservation).to.have.property('checkInDate', pm.environment.get(\"current_timestamp\"));\r",
+									"    pm.expect(reservation).to.have.property('checkOutDate', pm.environment.get(\"tomorrow_timestamp\"));\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"NEW_RESERVATION_ID\", reservation.id);\r",
+									"pm.environment.set(\"NEW_RESERVATION_USERFULLNAME\", reservation.userFullName);\r",
+									"pm.environment.set(\"NEW_RESERVATION_ROOMID\", reservation.roomId);\r",
+									"pm.environment.set(\"NEW_RESERVATION_NUMBERPERSON\", reservation.numberPerson);\r",
+									"pm.environment.set(\"NEW_RESERVATION_MODULEDPRICE\", reservation.moduledPrice);\r",
+									"pm.environment.set(\"NEW_RESERVATION_TOTALPRICE\", reservation.totalPrice);\r",
+									"pm.environment.set(\"NEW_RESERVATION_PARKING\", reservation.parking);\r",
+									"pm.environment.set(\"NEW_RESERVATION_KIDBED\", reservation.kidBed);\r",
+									"pm.environment.set(\"NEW_RESERVATION_BREAKFAST\", reservation.breakfast);\r",
+									"pm.environment.set(\"NEW_RESERVATION_ROMANCEPACK\", reservation.romancePack);\r",
+									"pm.environment.set(\"NEW_RESERVATION_CHECKINDATE\", reservation.checkInDate);\r",
+									"pm.environment.set(\"NEW_RESERVATION_CHECKOUTDATE\", reservation.checkOutDate);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var current_timestamp = new Date(new Date().getTime()+(5*24*60*60*1000));\r",
+									"var tomorrow_timestamp = new Date(new Date().getTime()+(7*24*60*60*1000));\r",
+									"postman.setEnvironmentVariable(\"current_timestamp\", current_timestamp.toISOString());\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"tomorrow_timestamp\", tomorrow_timestamp.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userFullName\": \"Leo RESSAYRE\",\r\n    \"roomId\": \"1\",\r\n    \"numberPerson\": \"1\",\r\n    \"parking\": false,\r\n    \"kidBed\": false,\r\n    \"romancePack\": false,\r\n    \"breakfast\": true,\r\n    \"checkInDate\": \"{{current_timestamp}}\",\r\n    \"checkOutDate\": \"{{tomorrow_timestamp}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RESERVATION_HOST}}/reservations",
+							"host": [
+								"{{RESERVATION_HOST}}"
+							],
+							"path": [
+								"reservations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get reservations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Retrieve Reservations Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Parse the response body as JSON\r",
+									"const reservations = pm.response.json();\r",
+									"\r",
+									"// Check if the response is an array\r",
+									"pm.test(\"🟢 Retrieve Reservations Test - Response is an array\", function () {\r",
+									"    pm.expect(reservations).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"// Check the structure and properties of each hotel object in the array\r",
+									"pm.test(\"🟢 Retrieve Reservations Test - Reservation object structure and properties are correct\", function () {\r",
+									"    reservations.forEach(function (reservation) {\r",
+									"        pm.expect(reservation).to.be.an('object');\r",
+									"        pm.expect(reservation).to.have.property('id');\r",
+									"        pm.expect(reservation).to.have.property('userFullName');\r",
+									"        pm.expect(reservation).to.have.property('numberPerson');\r",
+									"        pm.expect(reservation).to.have.property('roomId');\r",
+									"        pm.expect(reservation).to.have.property('moduledPrice');\r",
+									"        pm.expect(reservation).to.have.property('totalPrice');\r",
+									"        pm.expect(reservation).to.have.property('parking');\r",
+									"        pm.expect(reservation).to.have.property('kidBed');\r",
+									"        pm.expect(reservation).to.have.property('romancePack');\r",
+									"        pm.expect(reservation).to.have.property('breakfast');\r",
+									"        pm.expect(reservation).to.have.property('checkInDate');\r",
+									"        pm.expect(reservation).to.have.property('checkOutDate');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const newReservation = reservations.find(reservation => reservation.id == pm.environment.get(\"NEW_RESERVATION_ID\"))\r",
+									"\r",
+									"pm.test(\"🟢 Retrieve Reservations Test - Check newly created reservation\", function () {\r",
+									"    pm.expect(newReservation).to.have.property('userFullName', pm.environment.get(\"NEW_RESERVATION_USERFULLNAME\"))\r",
+									"    pm.expect(newReservation).to.have.property('numberPerson', Number(pm.environment.get(\"NEW_RESERVATION_NUMBERPERSON\")))\r",
+									"    pm.expect(newReservation).to.have.property('roomId', Number(pm.environment.get(\"NEW_RESERVATION_ROOMID\")))\r",
+									"    pm.expect(newReservation).to.have.property('moduledPrice', pm.environment.get(\"NEW_RESERVATION_MODULEDPRICE\"))\r",
+									"    pm.expect(newReservation).to.have.property('totalPrice', pm.environment.get(\"NEW_RESERVATION_TOTALPRICE\"))\r",
+									"    pm.expect(newReservation).to.have.property('parking', pm.environment.get(\"NEW_RESERVATION_PARKING\"))\r",
+									"    pm.expect(newReservation).to.have.property('kidBed', pm.environment.get(\"NEW_RESERVATION_KIDBED\"))\r",
+									"    pm.expect(newReservation).to.have.property('romancePack', pm.environment.get(\"NEW_RESERVATION_ROMANCEPACK\"))\r",
+									"    pm.expect(newReservation).to.have.property('breakfast', pm.environment.get(\"NEW_RESERVATION_BREAKFAST\"))\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{RESERVATION_HOST}}/reservations",
+							"host": [
+								"{{RESERVATION_HOST}}"
+							],
+							"path": [
+								"reservations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update new room Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Reservation Test - Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Reservation Test - Response body is not empty\", function () {\r",
+									"    pm.response.to.have.jsonBody();\r",
+									"});\r",
+									"\r",
+									"const updatedReservation = pm.response.json();\r",
+									"\r",
+									"pm.test(\"🟢 Update Reservation Test - Response contains updated reservation properties\", function () {\r",
+									"    pm.expect(updatedReservation).to.have.property('id');\r",
+									"    pm.expect(updatedReservation.id).to.be.a('number');\r",
+									"    pm.expect(updatedReservation).to.have.property('userFullName', \"Leo RESSEYRE\");\r",
+									"    pm.expect(updatedReservation).to.have.property('numberPerson', 2);\r",
+									"    pm.expect(updatedReservation).to.have.property('roomId', 1);\r",
+									"    pm.expect(updatedReservation).to.have.property('moduledPrice', 1800);\r",
+									"    pm.expect(updatedReservation).to.have.property('totalPrice', 1875);\r",
+									"    pm.expect(updatedReservation).to.have.property('parking', true);\r",
+									"    pm.expect(updatedReservation).to.have.property('kidBed', true);\r",
+									"    pm.expect(updatedReservation).to.have.property('romancePack', true);\r",
+									"    pm.expect(updatedReservation).to.have.property('breakfast', false);\r",
+									"    pm.expect(updatedReservation).to.have.property('checkInDate', pm.environment.get(\"current_timestamp\"));\r",
+									"    pm.expect(updatedReservation).to.have.property('checkOutDate', pm.environment.get(\"tomorrow_timestamp\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var current_timestamp = new Date(new Date().getTime()+(5*24*60*60*1000));\r",
+									"var tomorrow_timestamp = new Date(new Date().getTime()+(7*24*60*60*1000));\r",
+									"postman.setEnvironmentVariable(\"current_timestamp\", current_timestamp.toISOString());\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"tomorrow_timestamp\", tomorrow_timestamp.toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userFullName\": \"Leo RESSEYRE\",\r\n    \"numberPerson\": \"2\",\r\n    \"parking\": true,\r\n    \"kidBed\": true,\r\n    \"romancePack\": true,\r\n    \"breakfast\": false,\r\n    \"checkInDate\": \"{{current_timestamp}}\",\r\n    \"checkOutDate\": \"{{tomorrow_timestamp}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{RESERVATION_HOST}}/reservations/{{NEW_RESERVATION_ID}}",
+							"host": [
+								"{{RESERVATION_HOST}}"
+							],
+							"path": [
+								"reservations",
+								"{{NEW_RESERVATION_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete reservation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check the status code\r",
+									"pm.test(\"🟢 Update Reservation Test - Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"// Check if the response body is not empty\r",
+									"pm.test(\"🟢 Update Reservation Test - Response body is empty\", function () {\r",
+									"    pm.expect(pm.response.text()).to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{TOKEN}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{RESERVATION_HOST}}/reservations/{{NEW_RESERVATION_ID}}",
+							"host": [
+								"{{RESERVATION_HOST}}"
+							],
+							"path": [
+								"reservations",
+								"{{NEW_RESERVATION_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
