@@ -1,5 +1,6 @@
 import { sequelize } from './config/database.config';
 import './models/category';
+import './models/pricePolicy';
 
 (async () => {
   try {

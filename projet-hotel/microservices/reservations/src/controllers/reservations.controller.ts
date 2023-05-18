@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 
 import { getAllReservations, createReservation, getReservationById, updateReservation, deleteReservation as serviceDeleteReservation, getReservationByUserFullName as serviceGetReservationByUserFullName } from '../../database/services/reservation.service';
 import { getRoomById } from '../linkers/hotels.linker';
-import { getCategoryByCode } from '../linkers/configurations.linker';
+import { getCategoryByCode, getPricePoliciesByCodes } from '../linkers/configurations.linker';
 import { AuthenticatedRequest } from '../types/types'
 import { Reservation } from '../../database/models/reservation';
 
@@ -117,24 +117,24 @@ export async function postReservation(req: AuthenticatedRequest, res: Response):
     }
     savedReservation.numberPerson = reservationData.numberPerson;
 
-    savedReservation.moduledPrice = getDatesPriceForRoom(categoryData.basePrice, DATE_checkInDate, DATE_checkOutDate)
+    savedReservation.moduledPrice = await getDatesPriceForRoom(req, categoryData.basePrice, DATE_checkInDate, DATE_checkOutDate)
     if (savedReservation.numberPerson == 1) {
-      console.log("ONLY ONE : ", (getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice)
-      savedReservation.moduledPrice = savedReservation.moduledPrice + ((getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice) 
+      console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+      savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
     }
 
     savedReservation.totalPrice = savedReservation.moduledPrice
 
     if (reservationData.parking && reservationData.parking == true) {
       savedReservation.parking = true
-      savedReservation.totalPrice += getParkingPrice()
+      savedReservation.totalPrice += await getParkingPrice(req)
     } else {
       savedReservation.parking = false
     }
 
     if (reservationData.kidBed && reservationData.kidBed == true) {
       savedReservation.kidBed = true
-      savedReservation.totalPrice += getKidBedPrice()
+      savedReservation.totalPrice += await getKidBedPrice(req)
     } else {
       savedReservation.kidBed = false
     }
@@ -146,14 +146,14 @@ export async function postReservation(req: AuthenticatedRequest, res: Response):
       }
 
       savedReservation.romancePack = true
-      savedReservation.totalPrice += getRomancePackPrice()
+      savedReservation.totalPrice += await getRomancePackPrice(req)
     } else {
       savedReservation.romancePack = false
     }
 
     if (reservationData.breakfast && reservationData.breakfast == true) {
       savedReservation.breakfast = true
-      savedReservation.totalPrice += getBreakfastPrice()
+      savedReservation.totalPrice += await getBreakfastPrice(req)
     } else {
       savedReservation.breakfast = false
     }
@@ -206,27 +206,27 @@ export async function putReservation(req: AuthenticatedRequest, res: Response): 
         res.status(404).json({error: 'La chambre renseigné est introuvable'})
       }
       const category = await getCategoryByCode(req, room.categoryCode)
-      savedReservation.moduledPrice = getDatesPriceForRoom(category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
+      savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
     } else {
       const room = await getRoomById(req, currentReservation.roomId)
       if (!room) {
         res.status(404).json({error: 'La chambre renseigné est introuvable'})
       }
       const category = await getCategoryByCode(req, room.categoryCode)
-      savedReservation.moduledPrice = getDatesPriceForRoom(category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
+      savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
       console.log("AFTER TIME CARE : ", savedReservation.moduledPrice)
     }
     
     if (reservationData.numberPerson != null && reservationData.numberPerson != currentReservation.numberPerson) {
       savedReservation.numberPerson = reservationData.numberPerson
       if (savedReservation.numberPerson == 1) {
-        console.log("ONLY ONE : ", (getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice)
-        savedReservation.moduledPrice = savedReservation.moduledPrice + ((getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice) 
+        console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+        savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
       }
     } else {
       if (currentReservation.numberPerson == 1) {
-        console.log("ONLY ONE : ", (getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice)
-        savedReservation.moduledPrice = savedReservation.moduledPrice + ((getMajoredPercentageByPersons(1) / 100) * savedReservation.moduledPrice) 
+        console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+        savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
       }
     }
     savedReservation.totalPrice = savedReservation.moduledPrice
@@ -235,23 +235,23 @@ export async function putReservation(req: AuthenticatedRequest, res: Response): 
     if (reservationData.parking != null) {
       if (reservationData.parking == true) {
         savedReservation.parking = true
-        savedReservation.totalPrice += getParkingPrice()
+        savedReservation.totalPrice += await getParkingPrice(req)
       } else {
         savedReservation.parking = false
       }
     } else if (currentReservation.parking == true) {
-      savedReservation.totalPrice += getParkingPrice()
+      savedReservation.totalPrice += await getParkingPrice(req)
     }
 
     if (reservationData.kidBed != null) {
       if (reservationData.kidBed == true) {
         savedReservation.kidBed = true
-        savedReservation.totalPrice += getKidBedPrice()
+        savedReservation.totalPrice += await getKidBedPrice(req)
       } else {
         savedReservation.kidBed = false
       }
     } else if (currentReservation.kidBed == true) {
-      savedReservation.totalPrice += getKidBedPrice()
+      savedReservation.totalPrice += await getKidBedPrice(req)
     }
 
     if (reservationData.romancePack != null) {
@@ -261,23 +261,23 @@ export async function putReservation(req: AuthenticatedRequest, res: Response): 
           return;
         }
         savedReservation.romancePack = true
-        savedReservation.totalPrice += getRomancePackPrice()
+        savedReservation.totalPrice += await getRomancePackPrice(req)
       } else {
         savedReservation.romancePack = false
       }
     } else if (currentReservation.romancePack == true) {
-      savedReservation.totalPrice += getRomancePackPrice()
+      savedReservation.totalPrice += await getRomancePackPrice(req)
     }
 
     if (reservationData.breakfast != null) {
       if (reservationData.breakfast == true) {
         savedReservation.breakfast = true
-        savedReservation.totalPrice += getBreakfastPrice()
+        savedReservation.totalPrice += await getBreakfastPrice(req)
       } else {
         savedReservation.breakfast = false
       }
     } else if (currentReservation.breakfast == true) {
-      savedReservation.totalPrice += getBreakfastPrice()
+      savedReservation.totalPrice += await getBreakfastPrice(req)
     }
 
     console.log(savedReservation)
@@ -315,30 +315,42 @@ function checkPackRomanceValide(date: Date): boolean {
   return date < maximum_date;
 }
 
-function getMajoredPercentageByDate(date: Date): number {
+async function getMajoredPercentageByDate(req: AuthenticatedRequest, date: Date): Promise<number> {
   const jour = date.getDay();
+  const pricePolicies = await getPricePoliciesByCodes(req, ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'])
 
-  if (jour === 5 || jour === 6) {
-    return 15;
-  } else if (jour === 3 || jour === 4) {
-    return -10;
+  if (jour === 1) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D1').percentage
+  } else if (jour === 2) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D2').percentage
+  } else if (jour === 3) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D3').percentage
+  } else if (jour === 4) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D4').percentage
+  } else if (jour === 5) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D5').percentage
+  } else if (jour === 6) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D6').percentage
+  } else if (jour === 7) {
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'D7').percentage
   } else {
     return 0;
   }
 }
 
-function getMajoredPercentageByPersons(personNumber: number): number {
-  return personNumber === 1 ? -5 : 0
+async function getMajoredPercentageByPersons(req: AuthenticatedRequest, personNumber: number): Promise<number> {
+  const pricePolicies = await getPricePoliciesByCodes(req, ['P1'])
+  return personNumber === 1 ? pricePolicies.find(pricePolicy => pricePolicy.code === 'P1').percentage : 0
 }
 
-function getDatesPriceForRoom(roomBasePrice: number, checkInDate: Date, checkOutDate: Date): number {
+async function getDatesPriceForRoom(req: AuthenticatedRequest, roomBasePrice: number, checkInDate: Date, checkOutDate: Date): Promise<number> {
   let result = 0;
   let currentDate = new Date(checkInDate);
 
   while (currentDate < checkOutDate) {
     console.log("RESULT BEFORE : ", result)
-    console.log("PERCENTAGE : ", (getMajoredPercentageByDate(currentDate) / 100))
-    result += roomBasePrice + (( getMajoredPercentageByDate(currentDate) / 100) * roomBasePrice)
+    console.log("PERCENTAGE : ", (await getMajoredPercentageByDate(req, currentDate) / 100))
+    result += roomBasePrice + ((await getMajoredPercentageByDate(req, currentDate) / 100) * roomBasePrice)
     currentDate.setDate(currentDate.getDate() + 1);
     console.log("RESULT AFTER : ", result)
   }
@@ -346,18 +358,22 @@ function getDatesPriceForRoom(roomBasePrice: number, checkInDate: Date, checkOut
   return result;
 }
 
-function getParkingPrice(): number {
-  return 25
+async function getParkingPrice(req: AuthenticatedRequest): Promise<number> {
+  const pricePolicies = await getPricePoliciesByCodes(req, ['SP'])
+  return pricePolicies.find(pricePolicy => pricePolicy.code === 'SP').price
 }
 
-function getKidBedPrice(): number {
-  return 0
+async function getKidBedPrice(req: AuthenticatedRequest): Promise<number> {
+  const pricePolicies = await getPricePoliciesByCodes(req, ['SK'])
+  return pricePolicies.find(pricePolicy => pricePolicy.code === 'SK').price
 }
 
-function getRomancePackPrice(): number {
-  return 50
+async function getRomancePackPrice(req: AuthenticatedRequest): Promise<number> {
+  const pricePolicies = await getPricePoliciesByCodes(req, ['SR'])
+  return pricePolicies.find(pricePolicy => pricePolicy.code === 'SR').price
 }
 
-function getBreakfastPrice(): number {
-  return 30
+async function getBreakfastPrice(req: AuthenticatedRequest): Promise<number> {
+  const pricePolicies = await getPricePoliciesByCodes(req, ['SB'])
+  return pricePolicies.find(pricePolicy => pricePolicy.code === 'SB').price
 }
