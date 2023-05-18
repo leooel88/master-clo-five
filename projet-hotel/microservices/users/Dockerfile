@@ -1,7 +1,21 @@
-FROM node:14
+# Specify a base image
+FROM node:16-alpine
 
+# Set a working directory
 WORKDIR /app
-COPY package.json .
+
+# Install dependencies
+COPY package*.json ./
 RUN npm install
+
+# Copy source code to working directory
 COPY . .
-CMD npm start
+
+# Build the project
+RUN npm run build
+
+# Expose API port to the outside
+EXPOSE ${USER_MICROSERVICE_PORT}
+
+# Launch application
+CMD ["npm","start"]

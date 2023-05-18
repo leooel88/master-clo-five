@@ -10,6 +10,7 @@ export const seedUser = async () => {
         first_name: "ADMIN",
         last_name: "ADMIN",
         username: "ADMIN",
+        email: "admin@user.com",
         password: "@ADMINpwd2023",
         role: "ADMIN"
       }

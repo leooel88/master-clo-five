@@ -4,7 +4,7 @@
   "description": "API de réservation d'hôtel",
   "main": "index.js",
   "scripts": {
-    "start": "npm run start:microservice",
+    "start": "db:sync && npm run start:microservice",
     "clean:dist": "rimraf dist",
     "start:microservice": "npm run start:configuration-service",
     "start:configuration-service": "node dist/src/server.js",

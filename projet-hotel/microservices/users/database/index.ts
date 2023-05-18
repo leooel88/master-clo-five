@@ -14,6 +14,7 @@ import './models/user';
     // Code pour insérer des données initiales si nécessaire
     await seedUser();
   } catch (error) {
+    console.log(process.env.USERS_DATABASE_URL)
     console.error('Impossible de se connecter à la base de données:', error);
   }
 })();

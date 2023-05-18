@@ -234,3 +234,22 @@ npm run db:sync
 ```sh
 npm run start
 ```
+
+### Docker Usage
+
+To dockerize the whole project, it is necessary to build and run microservices seperatly. The process
+to achieve this is the same for each microservices :
+
+ - Ensure the package.json of the microservice includes an npm start script that launches the
+ db:sync script and then, that launches the start:microservice script
+ - Ensure the .env file is created with the write values
+ - Build the docker image from the microservice root directory, using this command :
+
+```sh
+docker build -t hotel-reservation-api-<NAME OF THE MICROSERVICE>-microservice:1.0.0 .
+```
+ - Run the created Image using this command :
+
+ ```sh
+ docker run --env-file .env -p 8000:<PORT OF THE MICROSERVICE (in the .env file)> hotel-reservation-api-<NAME OF THE MICROSERVICE>-microservice:1.0.0
+ ```
