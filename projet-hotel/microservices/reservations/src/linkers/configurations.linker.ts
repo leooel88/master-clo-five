@@ -23,7 +23,7 @@ export async function getPricePoliciesByCodes(req: AuthenticatedRequest, pricePo
   try {
     let headers = { authorization: req.headers.authorization };
     let response = await categoryService.get(
-      `/codes`,
+      '/pricePolicies/codes',
       { 
         headers,
         params: {

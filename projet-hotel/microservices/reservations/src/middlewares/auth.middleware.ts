@@ -25,7 +25,6 @@ export async function authUser(req: AuthenticatedRequest, res: Response, next: N
     }
 
     const user = await getUserById(req, decoded.id);
-    console.log(user)
 
     if (!user) {
       res.status(401).json({ error: 'Token invalide' });
