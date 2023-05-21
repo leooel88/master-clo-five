@@ -5,9 +5,9 @@ import { authUser, authAdmin } from '../middlewares/auth.middleware';
 const roomRoutes = express.Router();
 
 roomRoutes.get('/', authUser, getRooms);
+roomRoutes.post('/', authAdmin, postRoom);
 roomRoutes.get('/:id', authUser, getRoom);
 roomRoutes.get('/hotel/:hotelId', authUser, getRoomsByHotel);
-roomRoutes.post('/', authAdmin, postRoom);
 roomRoutes.put('/:id', authAdmin, putRoom);
 roomRoutes.delete('/:id', authAdmin, deleteRoom);
 

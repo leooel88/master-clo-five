@@ -5,10 +5,10 @@ import { authAdmin } from '../middlewares/auth.middleware';
 const userRoutes = express.Router();
 
 userRoutes.get('/', authAdmin, getUsers);
-userRoutes.get('/:id', authAdmin, getUser);
-userRoutes.get('/:username', authAdmin, getUserByUsername);
 userRoutes.post('/', authAdmin, postUser);
 userRoutes.post('/login', authenticateUser)
+userRoutes.get('/:id', authAdmin, getUser);
+userRoutes.get('/:username', authAdmin, getUserByUsername);
 userRoutes.put('/:id', authAdmin, putUser);
 userRoutes.delete('/:id', authAdmin, deleteUser);
 

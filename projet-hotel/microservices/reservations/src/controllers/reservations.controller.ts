@@ -58,8 +58,6 @@ export async function getReservationsByHotelIdAndPeriod(req: Request, res: Respo
   const hotelId = Number(req.params.hotelId);
 
   try {
-    console.log(req.params.periodStart)
-    console.log(req.params.periodStart)
     const periodStart = new Date(Number(req.params.periodStart));
     const periodEnd = new Date(Number(req.params.periodEnd));
 
@@ -86,214 +84,434 @@ export async function getReservationsByHotelIdAndPeriod(req: Request, res: Respo
   }
 }
 
-export async function postReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
-  console.log("Microservice : Reservation : POST RESERVATION")
-  try {
-    const reservationData = req.body;
-    if (reservationData.moduledPrice || reservationData.totalPrice) {
-      res.status(400).json({ error: 'Les prix sont calculés automatiquement, vous ne pouvez pas les ajouter à la requête' })
-    }
+// export async function postReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
+//   console.log("Microservice : Reservation : POST RESERVATION")
+//   try {
+//     const reservationData = req.body;
+//     if (reservationData.moduledPrice || reservationData.totalPrice) {
+//       res.status(400).json({ error: 'Les prix sont calculés automatiquement, vous ne pouvez pas les ajouter à la requête' })
+//     }
 
-    let savedReservation: any = {};
-    savedReservation.userFullName = reservationData.userFullName
-    savedReservation.roomId = reservationData.roomId
+//     let savedReservation: any = {};
+//     savedReservation.userFullName = reservationData.userFullName
+//     savedReservation.roomId = reservationData.roomId
 
-    const DATE_checkInDate = new Date(reservationData.checkInDate)
-    const DATE_checkOutDate = new Date(reservationData.checkOutDate)
+//     const DATE_checkInDate = new Date(reservationData.checkInDate)
+//     const DATE_checkOutDate = new Date(reservationData.checkOutDate)
 
-    savedReservation.checkInDate = DATE_checkInDate
-    savedReservation.checkOutDate = DATE_checkOutDate
+//     savedReservation.checkInDate = DATE_checkInDate
+//     savedReservation.checkOutDate = DATE_checkOutDate
     
-    const roomData = await getRoomById(req, reservationData.roomId)
-    if (!roomData) {
-      res.status(404).json({error: 'La chambre renseigné est introuvable'})
-    }
+//     const roomData = await getRoomById(req, reservationData.roomId)
+//     if (!roomData) {
+//       res.status(404).json({error: 'La chambre renseigné est introuvable'})
+//     }
 
-    const categoryData = await getCategoryByCode(req, roomData.categoryCode)
+//     const categoryData = await getCategoryByCode(req, roomData.categoryCode)
 
-    if (reservationData.numberPerson > categoryData.capacity) {
-      res.status(400).json({ error: 'Le nombre de personne pour ce type de chambre a été dépacé' })
+//     if (reservationData.numberPerson > categoryData.capacity) {
+//       res.status(400).json({ error: 'Le nombre de personne pour ce type de chambre a été dépacé' })
+//       return;
+//     }
+//     savedReservation.numberPerson = reservationData.numberPerson;
+
+//     savedReservation.moduledPrice = await getDatesPriceForRoom(req, categoryData.basePrice, DATE_checkInDate, DATE_checkOutDate)
+//     if (savedReservation.numberPerson == 1) {
+//       console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+//       savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
+//     }
+
+//     savedReservation.totalPrice = savedReservation.moduledPrice
+
+//     if (reservationData.parking && reservationData.parking == true) {
+//       savedReservation.parking = true
+//       savedReservation.totalPrice += await getParkingPrice(req)
+//     } else {
+//       savedReservation.parking = false
+//     }
+
+//     if (reservationData.kidBed && reservationData.kidBed == true) {
+//       savedReservation.kidBed = true
+//       savedReservation.totalPrice += await getKidBedPrice(req)
+//     } else {
+//       savedReservation.kidBed = false
+//     }
+
+//     if (reservationData.romancePack && reservationData.romancePack == true) {
+//       if (checkPackRomanceValide(DATE_checkInDate)) {
+//         res.status(400).json({ error: "Le pack romance doit être réservé au moins deux jours en avance" })
+//         return;
+//       }
+
+//       savedReservation.romancePack = true
+//       savedReservation.totalPrice += await getRomancePackPrice(req)
+//     } else {
+//       savedReservation.romancePack = false
+//     }
+
+//     if (reservationData.breakfast && reservationData.breakfast == true) {
+//       savedReservation.breakfast = true
+//       savedReservation.totalPrice += await getBreakfastPrice(req)
+//     } else {
+//       savedReservation.breakfast = false
+//     }
+
+//     const newReservation = await createReservation(savedReservation);
+//     res.status(201).json(newReservation);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+export async function postReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
+  try {
+    // Step 1: Validate the incoming request.
+    const reservationData = req.body;
+    const validationError = validateReservationRequest(reservationData);
+    if (validationError) {
+      res.status(400).json({ error: validationError });
       return;
     }
-    savedReservation.numberPerson = reservationData.numberPerson;
 
-    savedReservation.moduledPrice = await getDatesPriceForRoom(req, categoryData.basePrice, DATE_checkInDate, DATE_checkOutDate)
-    if (savedReservation.numberPerson == 1) {
-      console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
-      savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
+    // Step 2: Verify no existing reservation conflicts.
+    const existingReservation = await findExistingReservation(reservationData.roomId, new Date(reservationData.checkInDate), new Date(reservationData.checkOutDate));
+    if (existingReservation) {
+      res.status(409).json({ error: 'A reservation already exists for this room during the requested period.' });
+      return;
     }
 
-    savedReservation.totalPrice = savedReservation.moduledPrice
-
-    if (reservationData.parking && reservationData.parking == true) {
-      savedReservation.parking = true
-      savedReservation.totalPrice += await getParkingPrice(req)
-    } else {
-      savedReservation.parking = false
+    // Step 3: Assemble the reservation data.
+    const savedReservation = await assembleReservationData(req, reservationData);
+    if (!savedReservation) {
+      res.status(400).json({ error: 'Unable to create reservation.' });
+      return;
     }
 
-    if (reservationData.kidBed && reservationData.kidBed == true) {
-      savedReservation.kidBed = true
-      savedReservation.totalPrice += await getKidBedPrice(req)
-    } else {
-      savedReservation.kidBed = false
-    }
-
-    if (reservationData.romancePack && reservationData.romancePack == true) {
-      if (checkPackRomanceValide(DATE_checkInDate)) {
-        res.status(400).json({ error: "Le pack romance doit être réservé au moins deux jours en avance" })
-        return;
-      }
-
-      savedReservation.romancePack = true
-      savedReservation.totalPrice += await getRomancePackPrice(req)
-    } else {
-      savedReservation.romancePack = false
-    }
-
-    if (reservationData.breakfast && reservationData.breakfast == true) {
-      savedReservation.breakfast = true
-      savedReservation.totalPrice += await getBreakfastPrice(req)
-    } else {
-      savedReservation.breakfast = false
-    }
-
+    // Step 4: Create the reservation in the database.
     const newReservation = await createReservation(savedReservation);
     res.status(201).json(newReservation);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-export async function putReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
-  console.log("Microservice : Reservation : UPDATE RESERVATION")
-  
-  const reservationId = Number(req.params.id);
-  const reservationData = req.body;
-  let savedReservation: any = {};
+function validateReservationRequest(reservationData): string | null {
   if (reservationData.moduledPrice || reservationData.totalPrice) {
-    res.status(400).json({ error: 'Les prix sont calculés automatiquement, vous ne pouvez pas les ajouter à la requête' })
+    return 'Prices are calculated automatically, you cannot add them to the request.';
   }
 
-  try {
-    const currentReservation = await getReservationById(reservationId)
-    if (!currentReservation) {
-      res.status(404).json({ error: 'Reservation introuvable' });
-      return;
+  if (reservationData.romancePack == true) {
+    const now = new Date();
+    const checkInDate = new Date(reservationData.checkInDate);
+    const diffTime = Math.abs(checkInDate.getTime() - now.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    if (diffDays < 2) {
+      return 'The Romance Pack must be reserved at least two days in advance.';
     }
+  }
 
-    if (reservationData.checkInDate != null) {
-      savedReservation.checkInDate = new Date(reservationData.checkInDate)
-    } else {
-      savedReservation.checkInDate = new Date(currentReservation.checkInDate)
-    }
+  return null; // No validation errors.
+}
 
-    if (reservationData.checkOutDate != null) {
-      savedReservation.checkOutDate = new Date(reservationData.checkOutDate)
-    } else {
-      savedReservation.checkOutDate = new Date(currentReservation.checkOutDate)
+async function findExistingReservation(roomId: number, checkInDate: Date, checkOutDate: Date): Promise<Reservation | null> {
+  const allReservations = await getAllReservations();
+  
+  for (const reservation of allReservations) {
+    if (reservation.roomId != roomId) {
+      continue;
     }
+  
+    const reservationCheckInDate = new Date(reservation.checkInDate);
+    const reservationCheckOutDate = new Date(reservation.checkOutDate);
 
-    if (savedReservation.checkInDate.getTime() >= savedReservation.checkOutDate.getTime()) {
-      res.status(400).json({ error: 'Check in and check out dates are wrong (check in date canno\'t be superior or equal to check out date)' });
-      return;
+    if ((checkInDate.getTime() <= reservationCheckOutDate.getTime() && checkInDate.getTime() >= reservationCheckInDate.getTime())
+    || (checkOutDate.getTime() <= reservationCheckOutDate.getTime() && checkOutDate.getTime() >= reservationCheckInDate.getTime())) {
+      return reservation;
     }
+  }
+  
+  return null;
+}
 
-    if (reservationData.roomId != null && reservationData.roomId != currentReservation.roomId) {
-      savedReservation.roomId = reservationData.roomId
-      const room = await getRoomById(req, savedReservation.roomId)
-      if (!room) {
-        res.status(404).json({error: 'La chambre renseigné est introuvable'})
-      }
-      const category = await getCategoryByCode(req, room.categoryCode)
-      savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
-    } else {
-      const room = await getRoomById(req, currentReservation.roomId)
-      if (!room) {
-        res.status(404).json({error: 'La chambre renseigné est introuvable'})
-      }
-      const category = await getCategoryByCode(req, room.categoryCode)
-      savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
-      console.log("AFTER TIME CARE : ", savedReservation.moduledPrice)
+async function assembleReservationData(req: AuthenticatedRequest, reservationData): Promise<Reservation | null> {
+  const savedReservation: Partial<Reservation> = {};
+  savedReservation.userFullName = reservationData.userFullName;
+  savedReservation.roomId = reservationData.roomId;
+  savedReservation.checkInDate = new Date(reservationData.checkInDate);
+  savedReservation.checkOutDate = new Date(reservationData.checkOutDate);
+  savedReservation.numberPerson = reservationData.numberPerson;
+
+  const roomData = await getRoomById(req, reservationData.roomId);
+  if (!roomData) {
+    return null;
+  }
+
+  const categoryData = await getCategoryByCode(req, roomData.categoryCode);
+  if (reservationData.numberPerson > categoryData.capacity) {
+    return null;
+  }
+
+  // Calculate moduledPrice and total price.
+  const basePrice = categoryData.basePrice;
+  savedReservation.moduledPrice = await calculateModuledPrice(req, basePrice, savedReservation.checkInDate, savedReservation.checkOutDate, savedReservation.numberPerson);
+  savedReservation.totalPrice = await calculateTotalPrice(req, savedReservation.moduledPrice, reservationData, savedReservation.checkInDate);
+
+  return savedReservation as Reservation;
+}
+
+async function calculateModuledPrice(req: AuthenticatedRequest, basePrice: number, checkInDate: Date, checkOutDate: Date, numberPerson: number): Promise<number> {
+  const moduledPrice = await getDatesPriceForRoom(req, basePrice, checkInDate, checkOutDate);
+  const majoredPercentage = await getMajoredPercentageByPersons(req, numberPerson);
+  return moduledPrice + ((majoredPercentage / 100) * moduledPrice);
+}
+
+async function calculateTotalPrice(req: AuthenticatedRequest, moduledPrice: number, reservationData: Reservation, checkInDate: Date): Promise<number> {
+  let totalPrice = moduledPrice;
+
+  // Add service costs.
+  if (reservationData.parking) {
+    totalPrice += await getParkingPrice(req);
+  }
+  if (reservationData.kidBed) {
+    totalPrice += await getKidBedPrice(req);
+  }
+  if (reservationData.romancePack) {
+    if (!checkPackRomanceValide(checkInDate)) {
+      return null;
     }
+    totalPrice += await getRomancePackPrice(req);
+  }
+  if (reservationData.breakfast) {
+    totalPrice += await getBreakfastPrice(req);
+  }
+
+  return totalPrice;
+}
+
+
+// export async function putReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
+//   console.log("Microservice : Reservation : UPDATE RESERVATION")
+  
+//   const reservationId = Number(req.params.id);
+//   const reservationData = req.body;
+//   let savedReservation: any = {};
+//   if (reservationData.moduledPrice || reservationData.totalPrice) {
+//     res.status(400).json({ error: 'Les prix sont calculés automatiquement, vous ne pouvez pas les ajouter à la requête' })
+//   }
+
+//   try {
+//     const currentReservation = await getReservationById(reservationId)
+//     if (!currentReservation) {
+//       res.status(404).json({ error: 'Reservation introuvable' });
+//       return;
+//     }
+
+//     if (reservationData.checkInDate != null) {
+//       savedReservation.checkInDate = new Date(reservationData.checkInDate)
+//     } else {
+//       savedReservation.checkInDate = new Date(currentReservation.checkInDate)
+//     }
+
+//     if (reservationData.checkOutDate != null) {
+//       savedReservation.checkOutDate = new Date(reservationData.checkOutDate)
+//     } else {
+//       savedReservation.checkOutDate = new Date(currentReservation.checkOutDate)
+//     }
+
+//     if (savedReservation.checkInDate.getTime() >= savedReservation.checkOutDate.getTime()) {
+//       res.status(400).json({ error: 'Check in and check out dates are wrong (check in date canno\'t be superior or equal to check out date)' });
+//       return;
+//     }
+
+//     if (reservationData.roomId != null && reservationData.roomId != currentReservation.roomId) {
+//       savedReservation.roomId = reservationData.roomId
+//       const room = await getRoomById(req, savedReservation.roomId)
+//       if (!room) {
+//         res.status(404).json({error: 'La chambre renseigné est introuvable'})
+//       }
+//       const category = await getCategoryByCode(req, room.categoryCode)
+//       savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
+//     } else {
+//       const room = await getRoomById(req, currentReservation.roomId)
+//       if (!room) {
+//         res.status(404).json({error: 'La chambre renseigné est introuvable'})
+//       }
+//       const category = await getCategoryByCode(req, room.categoryCode)
+//       savedReservation.moduledPrice = await getDatesPriceForRoom(req, category.basePrice, savedReservation.checkInDate, savedReservation.checkOutDate)
+//       console.log("AFTER TIME CARE : ", savedReservation.moduledPrice)
+//     }
     
-    if (reservationData.numberPerson != null && reservationData.numberPerson != currentReservation.numberPerson) {
-      savedReservation.numberPerson = reservationData.numberPerson
-      if (savedReservation.numberPerson == 1) {
-        console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
-        savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
-      }
-    } else {
-      if (currentReservation.numberPerson == 1) {
-        console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
-        savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
+//     if (reservationData.numberPerson != null && reservationData.numberPerson != currentReservation.numberPerson) {
+//       savedReservation.numberPerson = reservationData.numberPerson
+//       if (savedReservation.numberPerson == 1) {
+//         console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+//         savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
+//       }
+//     } else {
+//       if (currentReservation.numberPerson == 1) {
+//         console.log("ONLY ONE : ", (await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice)
+//         savedReservation.moduledPrice = savedReservation.moduledPrice + ((await getMajoredPercentageByPersons(req, 1) / 100) * savedReservation.moduledPrice) 
+//       }
+//     }
+//     savedReservation.totalPrice = savedReservation.moduledPrice
+//     console.log("AFTER NMB PERSON : ", savedReservation.moduledPrice)
+
+//     if (reservationData.parking != null) {
+//       if (reservationData.parking == true) {
+//         savedReservation.parking = true
+//         savedReservation.totalPrice += await getParkingPrice(req)
+//       } else {
+//         savedReservation.parking = false
+//       }
+//     } else if (currentReservation.parking == true) {
+//       savedReservation.totalPrice += await getParkingPrice(req)
+//     }
+
+//     if (reservationData.kidBed != null) {
+//       if (reservationData.kidBed == true) {
+//         savedReservation.kidBed = true
+//         savedReservation.totalPrice += await getKidBedPrice(req)
+//       } else {
+//         savedReservation.kidBed = false
+//       }
+//     } else if (currentReservation.kidBed == true) {
+//       savedReservation.totalPrice += await getKidBedPrice(req)
+//     }
+
+//     if (reservationData.romancePack != null) {
+//       if (reservationData.romancePack == true) {
+//         if (checkPackRomanceValide(savedReservation.checkInDate)) {
+//           res.status(400).json({ error: "Le pack romance doit être réservé au moins deux jours en avance" })
+//           return;
+//         }
+//         savedReservation.romancePack = true
+//         savedReservation.totalPrice += await getRomancePackPrice(req)
+//       } else {
+//         savedReservation.romancePack = false
+//       }
+//     } else if (currentReservation.romancePack == true) {
+//       savedReservation.totalPrice += await getRomancePackPrice(req)
+//     }
+
+//     if (reservationData.breakfast != null) {
+//       if (reservationData.breakfast == true) {
+//         savedReservation.breakfast = true
+//         savedReservation.totalPrice += await getBreakfastPrice(req)
+//       } else {
+//         savedReservation.breakfast = false
+//       }
+//     } else if (currentReservation.breakfast == true) {
+//       savedReservation.totalPrice += await getBreakfastPrice(req)
+//     }
+
+//     console.log(savedReservation)
+//     const updatedReservation = await updateReservation(reservationId, savedReservation);
+
+//     if (!updatedReservation) {
+//       res.status(404).json({ error: 'Reservation introuvable' });
+//       return;
+//     }
+
+//     res.json(updatedReservation);
+//   } catch (error) {
+//     console.log(error)
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+export async function putReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
+  console.log("Microservice : Reservation : PUT RESERVATION")
+  try {
+    const reservationId = Number(req.params.id);
+    const reservationData = req.body;
+
+    
+    const existingReservation = await getReservationById(reservationId);
+    
+    if (!reservationData.checkInDate) {
+      reservationData.checkInDate = existingReservation.checkInDate
+    }
+    if (!reservationData.checkOutDate) {
+      reservationData.checkOutDate = existingReservation.checkOutDate
+    }
+
+    const validationError = validateReservationRequest(reservationData);
+    if (validationError) {
+      res.status(400).json({ error: validationError });
+      return;
+    }
+
+    if (!existingReservation) {
+      res.status(404).json({ error: 'Reservation not found' });
+      return;
+    }
+
+    if (reservationData.roomId && existingReservation.roomId !== reservationData.roomId) {
+      const conflictingReservation = await findExistingReservation(reservationData.roomId, existingReservation.checkInDate, existingReservation.checkOutDate);
+
+      if (conflictingReservation) {
+        res.status(400).json({ error: 'This room is already booked during this period' });
+        return;
       }
     }
-    savedReservation.totalPrice = savedReservation.moduledPrice
-    console.log("AFTER NMB PERSON : ", savedReservation.moduledPrice)
+
+    let newModuledPrice;
+    let newTotalPrice;
+
+    if (reservationData.roomId || reservationData.checkInDate || reservationData.checkOutDate || reservationData.numberPerson) {
+      const roomData = await getRoomById(req, reservationData.roomId || existingReservation.roomId);
+      const categoryData = await getCategoryByCode(req, roomData.categoryCode);
+
+      newModuledPrice = await getDatesPriceForRoom(req, categoryData.basePrice, new Date(reservationData.checkInDate || existingReservation.checkInDate), new Date(reservationData.checkOutDate || existingReservation.checkOutDate));
+
+      if (reservationData.numberPerson == 1 || (!reservationData.numberPerson && existingReservation.numberPerson == 1)) {
+        newModuledPrice += ((await getMajoredPercentageByPersons(req, 1) / 100) * newModuledPrice);
+      }
+
+      newTotalPrice = newModuledPrice;
+    }
 
     if (reservationData.parking != null) {
       if (reservationData.parking == true) {
-        savedReservation.parking = true
-        savedReservation.totalPrice += await getParkingPrice(req)
-      } else {
-        savedReservation.parking = false
+        newTotalPrice += await getParkingPrice(req);
       }
-    } else if (currentReservation.parking == true) {
-      savedReservation.totalPrice += await getParkingPrice(req)
+    } else if (existingReservation.parking == true) {
+      newTotalPrice += await getParkingPrice(req);
     }
 
     if (reservationData.kidBed != null) {
       if (reservationData.kidBed == true) {
-        savedReservation.kidBed = true
-        savedReservation.totalPrice += await getKidBedPrice(req)
-      } else {
-        savedReservation.kidBed = false
+        newTotalPrice += await getKidBedPrice(req);
       }
-    } else if (currentReservation.kidBed == true) {
-      savedReservation.totalPrice += await getKidBedPrice(req)
+    } else if (existingReservation.kidBed == true) {
+      newTotalPrice += await getKidBedPrice(req);
     }
 
     if (reservationData.romancePack != null) {
       if (reservationData.romancePack == true) {
-        if (checkPackRomanceValide(savedReservation.checkInDate)) {
-          res.status(400).json({ error: "Le pack romance doit être réservé au moins deux jours en avance" })
-          return;
-        }
-        savedReservation.romancePack = true
-        savedReservation.totalPrice += await getRomancePackPrice(req)
-      } else {
-        savedReservation.romancePack = false
+        newTotalPrice += await getRomancePackPrice(req);
       }
-    } else if (currentReservation.romancePack == true) {
-      savedReservation.totalPrice += await getRomancePackPrice(req)
+    } else if (existingReservation.romancePack == true) {
+      newTotalPrice += await getRomancePackPrice(req);
     }
 
     if (reservationData.breakfast != null) {
       if (reservationData.breakfast == true) {
-        savedReservation.breakfast = true
-        savedReservation.totalPrice += await getBreakfastPrice(req)
-      } else {
-        savedReservation.breakfast = false
+        newTotalPrice += await getBreakfastPrice(req);
       }
-    } else if (currentReservation.breakfast == true) {
-      savedReservation.totalPrice += await getBreakfastPrice(req)
+    } else if (existingReservation.breakfast == true) {
+      newTotalPrice += await getBreakfastPrice(req);
     }
 
-    console.log(savedReservation)
-    const updatedReservation = await updateReservation(reservationId, savedReservation);
+    const updatedReservation = await updateReservation(reservationId, { ...existingReservation, ...reservationData, moduledPrice: newModuledPrice, totalPrice: newTotalPrice });
 
-    if (!updatedReservation) {
-      res.status(404).json({ error: 'Reservation introuvable' });
-      return;
-    }
-
-    res.json(updatedReservation);
+    res.status(200).json(updatedReservation);
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: error.message });
   }
 }
+
 
 export async function deleteReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
   console.log("Microservice : Reservation : DELETE RESERVATION")
@@ -339,8 +557,11 @@ async function getMajoredPercentageByDate(req: AuthenticatedRequest, date: Date)
 }
 
 async function getMajoredPercentageByPersons(req: AuthenticatedRequest, personNumber: number): Promise<number> {
-  const pricePolicies = await getPricePoliciesByCodes(req, ['P1'])
-  return personNumber === 1 ? pricePolicies.find(pricePolicy => pricePolicy.code === 'P1').percentage : 0
+  if (personNumber == 1) {
+    const pricePolicies = await getPricePoliciesByCodes(req, ['P1'])
+    return pricePolicies.find(pricePolicy => pricePolicy.code === 'P1').percentage
+  }
+  return 0
 }
 
 async function getDatesPriceForRoom(req: AuthenticatedRequest, roomBasePrice: number, checkInDate: Date, checkOutDate: Date): Promise<number> {
@@ -348,11 +569,9 @@ async function getDatesPriceForRoom(req: AuthenticatedRequest, roomBasePrice: nu
   let currentDate = new Date(checkInDate);
 
   while (currentDate < checkOutDate) {
-    console.log("RESULT BEFORE : ", result)
-    console.log("PERCENTAGE : ", (await getMajoredPercentageByDate(req, currentDate) / 100))
+    const majoredPercentage = await getMajoredPercentageByDate(req, currentDate)
     result += roomBasePrice + ((await getMajoredPercentageByDate(req, currentDate) / 100) * roomBasePrice)
     currentDate.setDate(currentDate.getDate() + 1);
-    console.log("RESULT AFTER : ", result)
   }
 
   return result;
