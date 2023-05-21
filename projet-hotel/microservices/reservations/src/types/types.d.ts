@@ -23,13 +23,12 @@ export interface Category {
   basePrice: number;
 }
 
-export interface User {
+export interface PricePolicy {
   id: number;
-  first_name: string;
-  last_name: string;
-  username: string
-  password: string;
-  role: string;
+  code: string;
+  type: 'FIX' | 'PERCENTAGE';
+  price: number;
+  percentage: number; 
 }
 
 export interface AuthenticatedRequest extends Request {
